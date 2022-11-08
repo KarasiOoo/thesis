@@ -1,0 +1,85 @@
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __MAIN_H
+#define __MAIN_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Includes ------------------------------------------------------------------*/
+#include "stm32l4xx_hal.h"
+
+/* Private includes ----------------------------------------------------------*/
+
+/* Private defines for STM  -----------------------------------------------------------*/
+
+
+/* Private defines for MLX90395  -----------------------------------------------------------*/
+#define REG_GONF1 0x00
+#define REG_CONF2 0x01
+#define REG_CONF3 0x02
+#define REG_CONF4 0x03
+#define REG_CONF_SensTCH 0x04
+#define REG_CONF_SensTCL 0x05
+#define REG_CONF_OffsetX 0x06
+#define REG_CONF_OffsetY 0x07
+#define REG_CONF_OffsetZ 0x08
+#define REG_CONF_OffsetDriftX 0x09
+#define REG_CONF_OffsetDriftY 0x0A
+#define REG_CONF_OffsetDriftZ 0x0B
+#define REG_CONF_SensXY 0x0C
+#define REG_CONF_SensZ 0x0D
+#define REG_CONF_WocXYThreshold 0x0E
+#define REG_CONF_WocZThreshold 0x0F
+#define REG_CONF_WocTTThreshold 0x10
+#define REG_CONF_WocVThreshold 0x11
+
+#define REG_I2C_ComandStatus 0x80
+#define REG_I2C_CRC8CCITT 0x81
+#define REG_I2CX1 0x83
+#define REG_I2CX2 0x82
+#define REG_I2CY1 0x85
+#define REG_I2CY2 0x84
+#define REG_I2CZ1 0x87
+#define REG_I2CZ2 0x86
+#define REG_I2CT1 0x89
+#define REG_I2CT2 0x88
+#define REG_I2CV1 0x8B
+#define REG_I2CV2 0x8A
+#define REG_I2C_ID1 0x26
+
+
+#define SENSOR_ADDRESS_WR 0b00011010
+#define SENSOR_ADDRESS_RD 0b00011011
+
+
+
+/* Exported types ------------------------------------------------------------*/
+I2C_HandleTypeDef hi2c1;
+UART_HandleTypeDef huart2;
+
+typedef volatile uint16_t Reg_16;
+typedef volatile uint32_t Reg_32;
+typedef uint16_t Reg_dis;
+//typedef char[9] Reg_char;
+
+/* Exported constants --------------------------------------------------------*/
+//Reg_32 temp_address = 0x80;
+//Reg_32 odczyt;
+char I2C_ComandStatus_char[9];
+
+/* Exported macro ------------------------------------------------------------*/
+//HAL_StatusTypeDef HAL_I2C_Master_Transmit(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size, uint32_t Timeout);
+//HAL_StatusTypeDef HAL_I2C_Master_Receive(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size, uint32_t Timeout);
+//HAL_StatusTypeDef HAL_I2C_Mem_Write(&hi2c1, 0xA0, 0x10, 1, &test, sizeof(test), HAL_MAX_DELAY);
+//HAL_StatusTypeDef HAL_I2C_Mem_Read(&hi2c1, 0xA0, 0x10, 1, &result, sizeof(result), HAL_MAX_DELAY);
+
+/* Exported functions prototypes ---------------------------------------------*/
+void Error_Handler(void);
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __MAIN_H */
