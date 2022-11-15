@@ -47,10 +47,12 @@ extern "C" {
 #define REG_I2CV1 0x8B
 #define REG_I2CV2 0x8A
 #define REG_I2C_ID1 0x26
+#define REG_I2C_ID2 0x27
+#define REG_I2C_ID3 0x28
 
 
-#define SENSOR_ADDRESS_WR 0b00011010
-#define SENSOR_ADDRESS_RD 0b00011011
+#define SENSOR_ADDRESS_WR 0b00011000
+#define SENSOR_ADDRESS_RD 0b00011001
 
 /* Exported types ------------------------------------------------------------*/
 
