@@ -1,5 +1,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "stdio.h"
 
 /* Private typedef -----------------------------------------------------------*/
 
@@ -7,7 +8,6 @@
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
-
 UART_HandleTypeDef huart2;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -16,7 +16,6 @@ static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_USART2_UART_Init(void);
 
-/* Private user code ---------------------------------------------------------*/
 int __io_putchar(int ch)
 {
 	if(ch == '\n')
@@ -29,46 +28,39 @@ int __io_putchar(int ch)
 	return 1;
 }
 
+/* Private user code ---------------------------------------------------------*/
+uint8_t ReadReg(uint8_t reg)
+{
+  uint8_t read_data = 0;
+  HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDRESS_RD, reg, 1, &read_data, sizeof(read_data), HAL_MAX_DELAY);
+
+  return read_data;
+}
+
+void AskForId()
+{
+  printf("Call...");
+  uint8_t id1 = ReadReg(REG_I2C_ID1);
+
+  printf("ID1:%x,\n", id1);
+}
+
 
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
 
-  /* USER CODE END 1 */
-
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
   SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_USART2_UART_Init();
-  /* USER CODE BEGIN 2 */
 
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
+    AskForId();
+    HAL_Delay(1000);
   }
-  /* USER CODE END 3 */
+
 }
 
 /**
