@@ -54,6 +54,9 @@ extern "C" {
 #define SENSOR_ADDRESS_WR 0b00011000
 #define SENSOR_ADDRESS_RD 0b00011001
 
+#define SINGLE_MEASURE_MAGNETIC 0b00111110
+#define BURST_MEASURE_MAGNETIC 0b00011110
+
 /* Exported types ------------------------------------------------------------*/
 
 /* Exported constants --------------------------------------------------------*/
