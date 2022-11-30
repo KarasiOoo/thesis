@@ -28,11 +28,11 @@ int __io_putchar(int ch)
 }
 
 /* Private user code ---------------------------------------------------------*/
-uint8_t ReadReg(uint8_t reg)
+uint8_t ReadReg(uint8_t reg, uint16_t size_of_trans)
 {
   uint8_t read_data = 0;
-  HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDRESS_RD, reg, 1, &read_data, sizeof(read_data), HAL_MAX_DELAY);
-
+  HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDRESS_RD, reg, 1, &read_data, size_of_trans, HAL_MAX_DELAY);
+  
   return read_data;
 }
 
@@ -53,6 +53,7 @@ int main(void)
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_USART2_UART_Init();
+  HAL_Delay(200);
 
   while (1)
   {
