@@ -51,11 +51,11 @@ extern "C" {
 #define REG_I2C_ID3 0x28
 
 
-#define SENSOR_ADDRESS_WR 0b00011010
-#define SENSOR_ADDRESS_RD 0b00011011
+#define SENSOR_ADDRESS_WR 0b00011010     //usunięty ostatni bit
+#define SENSOR_ADDRESS_RD 0b00011010
 
 #define SINGLE_MEASURE_MAGNETIC 0b00111110
-#define BURST_MEASURE_MAGNETIC 0b00011110
+#define BURST_MEASURE_MAGNETIC 0b00011111
 
 /* Exported types ------------------------------------------------------------*/
 
