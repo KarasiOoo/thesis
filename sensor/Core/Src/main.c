@@ -28,20 +28,15 @@ int __io_putchar(int ch)
 }
 
 /* Private user code ---------------------------------------------------------*/
-uint8_t ReadReg(uint8_t reg, uint16_t size_of_trans)
+void ReadRegXBit(uint8_t reg, uint8_t* all_reg, uint8_t lenght)
 {
-  uint8_t read_data = 0;
-  HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDRESS_RD, reg, 1, &read_data, size_of_trans, HAL_MAX_DELAY);
-  
-  return read_data;
+  HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDRESS_RD, reg, 1, all_reg, lenght, HAL_MAX_DELAY);
 }
 
-void AskForId()
-{
-  printf("Call...");
-  uint8_t id1 = ReadReg(REG_I2C_ID1);
 
-  printf("ID1:%x,\n", id1);
+void WriteReg(uint8_t reg, uint8_t command)
+{
+  HAL_I2C_Mem_Write(&hi2c1, SENSOR_ADDRESS_WR, reg, 1, &command, 1, HAL_MAX_DELAY);
 }
 
 
@@ -55,10 +50,38 @@ int main(void)
   MX_USART2_UART_Init();
   HAL_Delay(200);
 
+  uint8_t mem[12];
+  uint8_t status_reg, crc_val;
+  int16_t x_val, y_val, z_val, t_val, v_val;
+
+  WriteReg(REG_I2C_ComandStatus, RESET_SENSOR);
+	HAL_Delay(5);
+	WriteReg(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
+  HAL_Delay(1);
+
+
+
   while (1)
   {
-    AskForId();
-    HAL_Delay(1000);
+	  ReadRegXBit(REG_I2C_ComandStatus, mem, 12);
+
+    status_reg = mem[0];
+    count = mem[0] >> 4 & 0111;
+    status_val = mem[0] & 0x01;
+    crc_val = mem[1];
+    x_val = mem[2] << 8 | mem[3];
+    y_val = mem[4] << 8 | mem[5];
+    z_val = mem[6] << 8 | mem[7];
+    t_val = mem[8] << 8 | mem[9];
+    t_val = t_val / 50;
+    v_val = mem[10] << 8 | mem[11];
+
+    //printf("Status: %02x,\t CRC: %02x,\t X:%04x,\t Y:%04x,\t Z:%04x,\t T:%04x,\t V:%04x,\n", status_reg, crc_val, x_val, y_val, z_val, t_val, v_val);
+    printf("Status: %02x,\t CRC: %02x,\t X:%05i,\t Y:%05i,\t Z:%05i,\t T:%i.%i,\t V:%i,\n", status_reg, crc_val, x_val, y_val, z_val, t_val, t_val/100, v_val);
+    //printf("Status: %01x,\t Count:%01x,\t CRC: %02x,\t X:%04x,\t Y:%04x,\t Z:%04x,\t T:%04x,\t V:%04x,\n", status_val, count, crc_val, x_val, y_val, z_val, t_val, v_val);
+    //printf("\n");
+
+	  HAL_Delay(1000);
   }
 
 }
