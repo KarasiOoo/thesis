@@ -56,6 +56,7 @@ extern "C" {
 
 #define SINGLE_MEASURE_MAGNETIC 0b00111110
 #define BURST_MEASURE_MAGNETIC 0b00011111
+#define RESET_SENSOR 0b11110000
 
 /* Exported types ------------------------------------------------------------*/
 
