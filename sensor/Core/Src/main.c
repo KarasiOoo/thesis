@@ -5,15 +5,24 @@
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
+#define REG_I2C_ComandStatus 0x80
+
+#define MEDIUM_SENSOR 0b00011010
+
+#define SINGLE_MEASURE_MAGNETIC 0b00110000
+#define BURST_MEASURE_MAGNETIC 0b00010000
+#define RESET_SENSOR 0b11110000
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
+I2C_HandleTypeDef hi2c2;
 UART_HandleTypeDef huart2;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
+static void MX_I2C2_Init(void);
 static void MX_USART2_UART_Init(void);
 
 int __io_putchar(int ch)
@@ -28,15 +37,14 @@ int __io_putchar(int ch)
 }
 
 /* Private user code ---------------------------------------------------------*/
-void ReadRegXBit(uint8_t reg, uint8_t* all_reg, uint8_t lenght)
+void WriteReg(uint8_t reg_address,  uint8_t command)
 {
-  HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDRESS_RD, reg, 1, all_reg, lenght, HAL_MAX_DELAY);
+	HAL_I2C_Mem_Write(&hi2c1, MEDIUM_SENSOR, reg_address, 1, &command, 1, HAL_MAX_DELAY);
 }
 
-
-void WriteReg(uint8_t reg, uint8_t command)
+void ReadReg(uint8_t reg_address, uint8_t* aquired_data, uint8_t lenght)
 {
-  HAL_I2C_Mem_Write(&hi2c1, SENSOR_ADDRESS_WR, reg, 1, &command, 1, HAL_MAX_DELAY);
+	HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, reg_address, 1, aquired_data, lenght, HAL_MAX_DELAY);
 }
 
 
@@ -45,42 +53,27 @@ int main(void)
 
   HAL_Init();
   SystemClock_Config();
+
   MX_GPIO_Init();
   MX_I2C1_Init();
+  MX_I2C2_Init();
   MX_USART2_UART_Init();
-  HAL_Delay(200);
 
   uint8_t mem[12];
-  uint8_t status_reg, crc_val;
-  int16_t x_val, y_val, z_val, t_val, v_val;
+  uint8_t status_reg;
+  int16_t x_val;
 
   WriteReg(REG_I2C_ComandStatus, RESET_SENSOR);
-	HAL_Delay(5);
-	WriteReg(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
-  HAL_Delay(1);
-
-
+  HAL_Delay(200);
+  WriteReg(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
+  HAL_Delay(200);
 
   while (1)
   {
-	  ReadRegXBit(REG_I2C_ComandStatus, mem, 12);
-
-    status_reg = mem[0];
-    count = mem[0] >> 4 & 0111;
-    status_val = mem[0] & 0x01;
-    crc_val = mem[1];
-    x_val = mem[2] << 8 | mem[3];
-    y_val = mem[4] << 8 | mem[5];
-    z_val = mem[6] << 8 | mem[7];
-    t_val = mem[8] << 8 | mem[9];
-    t_val = t_val / 50;
-    v_val = mem[10] << 8 | mem[11];
-
-    //printf("Status: %02x,\t CRC: %02x,\t X:%04x,\t Y:%04x,\t Z:%04x,\t T:%04x,\t V:%04x,\n", status_reg, crc_val, x_val, y_val, z_val, t_val, v_val);
-    printf("Status: %02x,\t CRC: %02x,\t X:%05i,\t Y:%05i,\t Z:%05i,\t T:%i.%i,\t V:%i,\n", status_reg, crc_val, x_val, y_val, z_val, t_val, t_val/100, v_val);
-    //printf("Status: %01x,\t Count:%01x,\t CRC: %02x,\t X:%04x,\t Y:%04x,\t Z:%04x,\t T:%04x,\t V:%04x,\n", status_val, count, crc_val, x_val, y_val, z_val, t_val, v_val);
-    //printf("\n");
-
+	  ReadReg(REG_I2C_ComandStatus, mem, 12);
+	  status_reg = mem[0];
+	  x_val = mem[2] << 8 | mem[3];
+	  printf("Status: %02x,\t  X:%05i\n", status_reg, x_val);
 	  HAL_Delay(1000);
   }
 
@@ -171,6 +164,52 @@ static void MX_I2C1_Init(void)
   /* USER CODE BEGIN I2C1_Init 2 */
 
   /* USER CODE END I2C1_Init 2 */
+
+}
+
+/**
+  * @brief I2C2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C2_Init(void)
+{
+
+  /* USER CODE BEGIN I2C2_Init 0 */
+
+  /* USER CODE END I2C2_Init 0 */
+
+  /* USER CODE BEGIN I2C2_Init 1 */
+
+  /* USER CODE END I2C2_Init 1 */
+  hi2c2.Instance = I2C2;
+  hi2c2.Init.Timing = 0x00000E14;
+  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c2.Init.OwnAddress2 = 0;
+  hi2c2.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Analogue filter
+  */
+  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c2, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Digital filter
+  */
+  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c2, 0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C2_Init 2 */
+
+  /* USER CODE END I2C2_Init 2 */
 
 }
 
