@@ -13,7 +13,6 @@ extern "C" {
 
 /* Private defines for STM  -----------------------------------------------------------*/
 
-
 /* Private defines for MLX90395  -----------------------------------------------------------*/
 #define REG_GONF1 0x00
 #define REG_CONF2 0x01
@@ -51,11 +50,19 @@ extern "C" {
 #define REG_I2C_ID3 0x28
 
 
-#define SENSOR_ADDRESS_WR 0b00011010     //usunięty ostatni bit
-#define SENSOR_ADDRESS_RD 0b00011010
+#define MEDIUM_SENSOR 0b00011010
+#define HIGH_SENSOR 0b00011000
+
 
 #define SINGLE_MEASURE_MAGNETIC 0b00111110
-#define BURST_MEASURE_MAGNETIC 0b00011111
+#define SINGLE_MEASURE_TEMPERATURE 0b00110001
+#define SINGLE_MEASURE_MT 0b00110000
+#define SINGLE_MEASURE_VOLTAGE 0b11000000
+
+#define BURST_MEASURE_MAGNETIC 0b00011110
+#define BURST_MEASURE_TEMPERATURE 0b00010001
+#define BURST_MEASURE_MT 0b00010000
+
 #define RESET_SENSOR 0b11110000
 
 /* Exported types ------------------------------------------------------------*/
