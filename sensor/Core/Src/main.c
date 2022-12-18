@@ -5,13 +5,6 @@
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
-#define REG_I2C_ComandStatus 0x80
-
-#define MEDIUM_SENSOR 0b00011010
-
-#define SINGLE_MEASURE_MAGNETIC 0b00110000
-#define BURST_MEASURE_MAGNETIC 0b00010000
-#define RESET_SENSOR 0b11110000
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
