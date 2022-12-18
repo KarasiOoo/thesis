@@ -30,15 +30,26 @@ int __io_putchar(int ch)
 }
 
 /* Private user code ---------------------------------------------------------*/
-void WriteReg(uint8_t reg_address,  uint8_t command)
+void WriteReg1(uint8_t reg_address,  uint8_t command)
 {
 	HAL_I2C_Mem_Write(&hi2c1, MEDIUM_SENSOR, reg_address, 1, &command, 1, HAL_MAX_DELAY);
 }
 
-void ReadReg(uint8_t reg_address, uint8_t* aquired_data, uint8_t lenght)
+void ReadReg1(uint8_t reg_address, uint8_t* aquired_data, uint8_t lenght)
 {
 	HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, reg_address, 1, aquired_data, lenght, HAL_MAX_DELAY);
 }
+
+void WriteReg2(uint8_t reg_address,  uint8_t command)
+{
+	HAL_I2C_Mem_Write(&hi2c2, HIGH_SENSOR, reg_address, 1, &command, 1, HAL_MAX_DELAY);
+}
+
+void ReadReg2(uint8_t reg_address, uint8_t* aquired_data, uint8_t lenght)
+{
+	HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, reg_address, 1, aquired_data, lenght, HAL_MAX_DELAY);
+}
+
 
 
 int main(void)
