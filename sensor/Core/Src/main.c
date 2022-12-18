@@ -63,26 +63,30 @@ int main(void)
   MX_I2C2_Init();
   MX_USART2_UART_Init();
 
-  uint8_t mem[12];
-  uint8_t status_reg;
-  int16_t x_val;
+  uint8_t mem1[12], mem2[12];
+  uint8_t status1_reg, status2_reg;
+  int16_t x1_val, x2_val;
 
-  WriteReg(REG_I2C_ComandStatus, RESET_SENSOR);
+  WriteReg1(REG_I2C_ComandStatus, RESET_SENSOR);
+  WriteReg2(REG_I2C_ComandStatus, RESET_SENSOR);
   HAL_Delay(200);
-  WriteReg(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
+  WriteReg1(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
+  WriteReg2(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
   HAL_Delay(200);
 
   while (1)
   {
-	  ReadReg(REG_I2C_ComandStatus, mem, 12);
-	  status_reg = mem[0];
-	  x_val = mem[2] << 8 | mem[3];
-	  printf("Status: %02x,\t  X:%05i\n", status_reg, x_val);
+	  ReadReg1(REG_I2C_ComandStatus, mem1, 12);
+	  ReadReg2(REG_I2C_ComandStatus, mem2, 12);
+	  status1_reg = mem1[0];
+	  status2_reg = mem2[0];
+	  x1_val = mem1[2] << 8 | mem1[3];
+	  x2_val = mem2[2] << 8 | mem2[3];
+	  printf("Status_1: %02x,\t  X_1:%05i\t  Status_2: %02x,\t  X_2:%05i\n", status1_reg, x1_val, status2_reg, x2_val);
 	  HAL_Delay(1000);
   }
 
 }
-
 /**
   * @brief System Clock Configuration
   * @retval None
