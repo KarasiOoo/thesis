@@ -65,13 +65,14 @@ int main(void)
 
   uint8_t mem1[12], mem2[12];
   uint8_t status1_reg, status2_reg;
-  int16_t x1_val, x2_val;
+  int16_t x1_val, x2_val, y1_val, y2_val, z1_val, z2_val, v1_val, v2_val;
+  float t1_val, t2_val;
 
   WriteReg1(REG_I2C_ComandStatus, RESET_SENSOR);
   WriteReg2(REG_I2C_ComandStatus, RESET_SENSOR);
   HAL_Delay(200);
-  WriteReg1(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
-  WriteReg2(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
+  WriteReg1(REG_I2C_ComandStatus, BURST_MEASURE_MT);
+  WriteReg2(REG_I2C_ComandStatus, BURST_MEASURE_MT);
   HAL_Delay(200);
 
   while (1)
@@ -82,7 +83,18 @@ int main(void)
 	  status2_reg = mem2[0];
 	  x1_val = mem1[2] << 8 | mem1[3];
 	  x2_val = mem2[2] << 8 | mem2[3];
-	  printf("Status_1: %02x,\t  X_1:%05i\t  Status_2: %02x,\t  X_2:%05i\n", status1_reg, x1_val, status2_reg, x2_val);
+    y1_val = mem1[4] << 8 | mem1[5];
+    y2_val = mem2[4] << 8 | mem2[5];
+    z1_val = mem1[6] << 8 | mem1[7];
+    z2_val = mem2[6] << 8 | mem2[7];
+    t1_val = mem1[8] << 8 | mem1[9];
+    t2_val = mem2[8] << 8 | mem2[9];
+    t1_val = t1_val/50;
+    t2_val = t2_val/50;
+    v1_val = mem1[10] << 8 | mem1[11];
+    v2_val = mem2[10] << 8 | mem2[11];
+	  printf("Status_1: %02x,\t X:%05i,\t Y:%05i,\t Z:%05i,\t T:%02f,\t V:%05i\n", status1_reg, x1_val, y1_val, z1_val, t1_val, v1_val);
+    printf("Status_2: %02x,\t X:%05i,\t Y:%05i,\t Z:%05i,\t T:%02f,\t V:%05i\n", status2_reg, x2_val, y2_val, z2_val, t2_val, v2_val);
 	  HAL_Delay(1000);
   }
 
