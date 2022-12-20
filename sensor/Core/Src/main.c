@@ -30,22 +30,22 @@ int __io_putchar(int ch)
 }
 
 /* Private user code ---------------------------------------------------------*/
-void WriteReg1(uint8_t reg_address,  uint8_t command)
+void WriteRegMid(uint8_t reg_address,  uint8_t command)
 {
 	HAL_I2C_Mem_Write(&hi2c1, MEDIUM_SENSOR, reg_address, 1, &command, 1, HAL_MAX_DELAY);
 }
 
-void ReadReg1(uint8_t reg_address, uint8_t* aquired_data, uint8_t lenght)
+void ReadRegMid(uint8_t reg_address, uint8_t* aquired_data, uint8_t lenght)
 {
 	HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, reg_address, 1, aquired_data, lenght, HAL_MAX_DELAY);
 }
 
-void WriteReg2(uint8_t reg_address,  uint8_t command)
+void WriteRegHigh(uint8_t reg_address,  uint8_t command)
 {
 	HAL_I2C_Mem_Write(&hi2c2, HIGH_SENSOR, reg_address, 1, &command, 1, HAL_MAX_DELAY);
 }
 
-void ReadReg2(uint8_t reg_address, uint8_t* aquired_data, uint8_t lenght)
+void ReadRegHigh(uint8_t reg_address, uint8_t* aquired_data, uint8_t lenght)
 {
 	HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, reg_address, 1, aquired_data, lenght, HAL_MAX_DELAY);
 }
@@ -54,7 +54,6 @@ void ReadReg2(uint8_t reg_address, uint8_t* aquired_data, uint8_t lenght)
 
 int main(void)
 {
-
   HAL_Init();
   SystemClock_Config();
 
@@ -68,17 +67,17 @@ int main(void)
   int16_t x1_val, x2_val, y1_val, y2_val, z1_val, z2_val, v1_val, v2_val;
   float t1_val, t2_val;
 
-  WriteReg1(REG_I2C_ComandStatus, RESET_SENSOR);
-  WriteReg2(REG_I2C_ComandStatus, RESET_SENSOR);
+  WriteRegMid(REG_I2C_ComandStatus, RESET_SENSOR);
+  WriteRegHigh(REG_I2C_ComandStatus, RESET_SENSOR);
   HAL_Delay(200);
-  WriteReg1(REG_I2C_ComandStatus, BURST_MEASURE_MT);
-  WriteReg2(REG_I2C_ComandStatus, BURST_MEASURE_MT);
+  WriteRegMid(REG_I2C_ComandStatus, BURST_MEASURE_MT);
+  WriteRegHigh(REG_I2C_ComandStatus, BURST_MEASURE_MT);
   HAL_Delay(200);
 
   while (1)
   {
-	  ReadReg1(REG_I2C_ComandStatus, mem1, 12);
-	  ReadReg2(REG_I2C_ComandStatus, mem2, 12);
+	  ReadRegMid(REG_I2C_ComandStatus, mem1, 12);
+	  ReadRegHigh(REG_I2C_ComandStatus, mem2, 12);
 	  status1_reg = mem1[0];
 	  status2_reg = mem2[0];
 	  x1_val = mem1[2] << 8 | mem1[3];
