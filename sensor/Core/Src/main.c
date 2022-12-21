@@ -51,6 +51,48 @@ void ReadRegHigh(uint8_t reg_address, uint8_t* aquired_data, uint8_t lenght)
 }
 
 
+void ReadMagneticTemperature(uint8_t sensor)
+{
+  I2C_HandleTypeDef i2c_address;
+  uint8_t dev_address;
+  
+  uint8_t memory[12];
+  uint8_t status;
+  int16_t x_val, y_val, z_val;//, t_val;
+  //float x_valf, y_valf, z_valf, t_valf;
+  float t_val;
+
+  if(sensor == 1)
+  {
+    i2c_address = hi2c1;
+    dev_address = MEDIUM_SENSOR;
+    printf("Medium range sensor: \n");
+  }
+  else if (sensor == 2)
+  {
+    i2c_address = hi2c2;
+    dev_address = HIGH_SENSOR;
+    printf("High range sensor: \n");
+  }
+  else
+  {
+    printf("Wrong number given");
+    return;
+  }
+  
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_I2C_ComandStatus, 1, memory, 12, HAL_MAX_DELAY);
+
+  status = memory[0];
+  x_val = memory[2] << 8 | memory[3];
+  y_val = memory[4] << 8 | memory[5];
+  z_val = memory[6] << 8 | memory[7];
+  t_val = ((memory[8] << 8) | memory[9]);
+  t_val = t_val / 50;
+
+  printf("Status: %02x,\t X:%05i,\t Y:%05i,\t Z:%05i,\t T:%3.2f,\n", status, x_val, y_val, z_val, t_val);
+  return;
+}
+
 
 int main(void)
 {
@@ -62,38 +104,18 @@ int main(void)
   MX_I2C2_Init();
   MX_USART2_UART_Init();
 
-  uint8_t mem1[12], mem2[12];
-  uint8_t status1_reg, status2_reg;
-  int16_t x1_val, x2_val, y1_val, y2_val, z1_val, z2_val, v1_val, v2_val;
-  float t1_val, t2_val;
-
   WriteRegMid(REG_I2C_ComandStatus, RESET_SENSOR);
   WriteRegHigh(REG_I2C_ComandStatus, RESET_SENSOR);
   HAL_Delay(200);
+
   WriteRegMid(REG_I2C_ComandStatus, BURST_MEASURE_MT);
   WriteRegHigh(REG_I2C_ComandStatus, BURST_MEASURE_MT);
   HAL_Delay(200);
 
   while (1)
   {
-	  ReadRegMid(REG_I2C_ComandStatus, mem1, 12);
-	  ReadRegHigh(REG_I2C_ComandStatus, mem2, 12);
-	  status1_reg = mem1[0];
-	  status2_reg = mem2[0];
-	  x1_val = mem1[2] << 8 | mem1[3];
-	  x2_val = mem2[2] << 8 | mem2[3];
-    y1_val = mem1[4] << 8 | mem1[5];
-    y2_val = mem2[4] << 8 | mem2[5];
-    z1_val = mem1[6] << 8 | mem1[7];
-    z2_val = mem2[6] << 8 | mem2[7];
-    t1_val = mem1[8] << 8 | mem1[9];
-    t2_val = mem2[8] << 8 | mem2[9];
-    t1_val = t1_val/50;
-    t2_val = t2_val/50;
-    v1_val = mem1[10] << 8 | mem1[11];
-    v2_val = mem2[10] << 8 | mem2[11];
-	  printf("Status_1: %02x,\t X:%05i,\t Y:%05i,\t Z:%05i,\t T:%02f,\t V:%05i\n", status1_reg, x1_val, y1_val, z1_val, t1_val, v1_val);
-    printf("Status_2: %02x,\t X:%05i,\t Y:%05i,\t Z:%05i,\t T:%02f,\t V:%05i\n", status2_reg, x2_val, y2_val, z2_val, t2_val, v2_val);
+    ReadMagneticTemperature(1);
+	  ReadMagneticTemperature(2);
 	  HAL_Delay(1000);
   }
 
