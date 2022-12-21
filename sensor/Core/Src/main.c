@@ -97,9 +97,10 @@ void ReadMagneticTemperature(uint8_t sensor)
 void ReadVoltage(uint8_t sensor)
 {
   I2C_HandleTypeDef i2c_address;
-  uint8_t dev_address;
+  uint8_t dev_address, v_val;
   uint8_t command = SINGLE_MEASURE_VOLTAGE;
-  int16_t* measured_voltage;
+  //int16_t* measured_voltage;
+  uint8_t memory[12];
 
   if(sensor == 1)
   {
@@ -121,10 +122,10 @@ void ReadVoltage(uint8_t sensor)
 
   HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_I2C_ComandStatus, 1, &command, 1, HAL_MAX_DELAY);
   HAL_Delay(1);
-  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_I2C_ComandStatus, 1, measured_voltage, 2, HAL_MAX_DELAY);
-  printf("%05i\n", measured_voltage);
-
-  return;
+  //HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_I2C_ComandStatus, 1, measured_voltage, 2, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_I2C_ComandStatus, 1, memory, 2, HAL_MAX_DELAY);
+  v_val = memory[10] << 8 | memory[11];
+  printf("%05i\n", v_val);
 }
 
 
