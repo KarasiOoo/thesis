@@ -20,34 +20,34 @@ static void MX_USART2_UART_Init(void);
 
 int __io_putchar(int ch)
 {
-	if(ch == '\n')
-	{
-		__io_putchar('\r');
-	}
+  if(ch == '\n')
+  {
+    __io_putchar('\r');
+  }
 
-	HAL_UART_Transmit(&huart2, (uint8_t*)&ch, 1, HAL_MAX_DELAY);
-	return 1;
+  HAL_UART_Transmit(&huart2, (uint8_t*)&ch, 1, HAL_MAX_DELAY);
+return 1;
 }
 
 /* Private user code ---------------------------------------------------------*/
 void WriteRegMid(uint8_t reg_address,  uint8_t command)
 {
-	HAL_I2C_Mem_Write(&hi2c1, MEDIUM_SENSOR, reg_address, 1, &command, 1, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Write(&hi2c1, MEDIUM_SENSOR, reg_address, 1, &command, 1, HAL_MAX_DELAY);
 }
 
 void ReadRegMid(uint8_t reg_address, uint8_t* aquired_data, uint8_t lenght)
 {
-	HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, reg_address, 1, aquired_data, lenght, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, reg_address, 1, aquired_data, lenght, HAL_MAX_DELAY);
 }
 
 void WriteRegHigh(uint8_t reg_address,  uint8_t command)
 {
-	HAL_I2C_Mem_Write(&hi2c2, HIGH_SENSOR, reg_address, 1, &command, 1, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Write(&hi2c2, HIGH_SENSOR, reg_address, 1, &command, 1, HAL_MAX_DELAY);
 }
 
 void ReadRegHigh(uint8_t reg_address, uint8_t* aquired_data, uint8_t lenght)
 {
-	HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, reg_address, 1, aquired_data, lenght, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, reg_address, 1, aquired_data, lenght, HAL_MAX_DELAY);
 }
 
 
@@ -76,7 +76,7 @@ void ReadMagneticTemperature(uint8_t sensor)
   }
   else
   {
-    printf("Wrong number given");
+    printf("Wrong number given!\n");
     return;
   }
   
@@ -116,7 +116,7 @@ void ReadVoltage(uint8_t sensor)
   }
   else
   {
-    printf("Wrong number given");
+    printf("Wrong number given!\n");
     return;
   }
 
@@ -152,8 +152,9 @@ int main(void)
   while (1)
   {
     ReadMagneticTemperature(1);
-	  ReadMagneticTemperature(2);
-	  HAL_Delay(1000);
+    ReadMagneticTemperature(2);
+    printf("\n");
+    HAL_Delay(1000);
   }
 
 }
