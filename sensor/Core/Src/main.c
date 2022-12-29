@@ -140,14 +140,15 @@ int main(void)
   MX_I2C1_Init();
   MX_I2C2_Init();
   MX_USART2_UART_Init();
+  HAL_Delay(300);
 
   WriteRegMid(REG_I2C_ComandStatus, RESET_SENSOR);
   WriteRegHigh(REG_I2C_ComandStatus, RESET_SENSOR);
-  HAL_Delay(200);
+  HAL_Delay(300);
 
   WriteRegMid(REG_I2C_ComandStatus, BURST_MEASURE_MT);
   WriteRegHigh(REG_I2C_ComandStatus, BURST_MEASURE_MT);
-  HAL_Delay(200);
+  HAL_Delay(300);
 
   while (1)
   {
