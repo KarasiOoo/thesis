@@ -85,6 +85,42 @@ void ReadMagnetic(uint8_t sensor)
   return;
 }
 
+void ReadTemperature(uint8_t sensor)
+{
+  I2C_HandleTypeDef i2c_address;
+  uint8_t dev_address;
+
+  uint8_t memory[2];
+  float t_valf;
+
+  if(sensor == 1)
+  {
+    i2c_address = hi2c1;
+    dev_address = MEDIUM_SENSOR;
+    printf("Medium range sensor: \n");
+  }
+  else if (sensor == 2)
+  {
+    i2c_address = hi2c2;
+    dev_address = HIGH_SENSOR;
+    printf("High range sensor: \n");
+  }
+  else
+  {
+    printf("Wrong number given!\n");
+    return;
+  }
+
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_I2CT2, 1, memory, 2, HAL_MAX_DELAY);
+
+  t_valf = memory[0] << 8 | memory[1];
+  t_valf = t_valf / 50;
+
+  printf("Temperature: %3.2f\n", t_valf);
+  return;
+
+}
+
 void ReadMagneticTemperature(uint8_t sensor)
 {
   I2C_HandleTypeDef i2c_address;
@@ -220,7 +256,11 @@ int main(void)
         ReadMagnetic(2);
         break;
       case 't':
+        WriteRegMid(REG_I2C_ComandStatus, SINGLE_MEASURE_TEMPERATURE);
+        WriteRegHigh(REG_I2C_ComandStatus, SINGLE_MEASURE_TEMPERATURE);
         printf("Measured value of temperature:\n");
+        ReadTemperature(1);
+        ReadTemperature(2);
         break;
       case 'v':
         printf("Measured value of voltage:\n");
