@@ -133,6 +133,8 @@ void ReadVoltage(uint8_t sensor)
 
 int main(void)
 {
+  uint8_t v_en = 1;
+
   HAL_Init();
   SystemClock_Config();
 
@@ -146,16 +148,91 @@ int main(void)
   WriteRegHigh(REG_I2C_ComandStatus, RESET_SENSOR);
   HAL_Delay(300);
 
-  WriteRegMid(REG_I2C_ComandStatus, BURST_MEASURE_MT);
-  WriteRegHigh(REG_I2C_ComandStatus, BURST_MEASURE_MT);
-  HAL_Delay(300);
+  //WriteRegMid(REG_I2C_ComandStatus, BURST_MEASURE_MT);
+  //WriteRegHigh(REG_I2C_ComandStatus, BURST_MEASURE_MT);
+  //HAL_Delay(300);
 
   while (1)
   {
-    ReadMagneticTemperature(1);
-    ReadMagneticTemperature(2);
+    uint8_t action, new_task;
+    printf("Choose action:\n");
+    printf("Measure:\n");
+    printf("\t m - Once magnetic field\n");
+    printf("\t t - Once temperature\n");
+    printf("\t v - Once voltage\n");
+    printf("\t c - Continues magnetic field and temperature\n");
+    printf("Calibration/settings:\n");
+    printf("\t a - Show all config parameters\n");
+    printf("\t s - Set sensitivity\n");
+    printf("\t o - Set offset\n");
+    printf("\t g - Set gain\n");
+    printf("\t i - Increase gain\n");
+    printf("\t d - Decrease gain\n");
+    printf("\t r - Set resolution for magnetic measurements\n");
+    printf("\t f - Set frequency of measurement for Burst Mode (BurstDataRate)\n");
+    printf("\t w - Enable/disable voltage measurement\n");
+    printf("What do you want to do?\t\n");
     printf("\n");
-    HAL_Delay(1000);
+
+    HAL_UART_Receive(&huart2, &action, 1, HAL_MAX_DELAY);
+
+    switch(action)
+    {
+      case 'm':
+        printf("Measured values of magnetic field:\n");
+        break;
+      case 't':
+        printf("Measured value of temperature:\n");
+        break;
+      case 'v':
+        printf("Measured value of voltage:\n");
+        break;
+      case 'c':
+        printf("Continues measurement:\n");
+        break;
+      case 'a':
+        printf("All configuration values:\n");
+        break;
+      case 's':
+        printf("Sensetivity settings.\n");
+        break;
+      case 'g':
+        printf("Gain settings.\n");
+        break;
+      case 'i':
+        printf("Gain increased by P.\n");
+        break;
+      case 'd':
+        printf("Gain decreased by P.\n");
+        break;
+      case 'r':
+        printf("Resolution settings.\n");
+        break;
+      case 'f':
+        printf("Burst mode settings.\n");
+        break;
+      case 'w':
+        if(v_en == 1)
+          {
+            printf("Voltage measurement enabled.\n");
+          }
+        else
+          {
+            printf("Voltage measurement disabled.\n");
+          }
+          break;
+      default:
+        printf("Unknown command.\n");
+        break;
+    }
+    printf("Press any button to continue.\n");
+    HAL_UART_Receive(&huart2, &new_task, 1, HAL_MAX_DELAY);
+    printf("\n\n\n");
+
+    // ReadMagneticTemperature(1);
+    // ReadMagneticTemperature(2);
+    // printf("\n");
+    // HAL_Delay(1000);
   }
 
 }
