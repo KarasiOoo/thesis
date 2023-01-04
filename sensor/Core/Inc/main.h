@@ -14,7 +14,7 @@ extern "C" {
 /* Private defines for STM  -----------------------------------------------------------*/
 
 /* Private defines for MLX90395  -----------------------------------------------------------*/
-#define REG_GONF1 0x00
+#define REG_CONF1 0x00
 #define REG_CONF2 0x01
 #define REG_CONF3 0x02
 #define REG_CONF4 0x03
