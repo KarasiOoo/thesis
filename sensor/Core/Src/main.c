@@ -209,6 +209,8 @@ void ReadVoltage(uint8_t sensor)
 int main(void)
 {
   uint8_t v_en = 1;
+  uint8_t calibration_mid[6], calibration_high[6];
+  int16_t xm_cal, ym_cal, zm_cal, xh_cal, yh_cal, zh_cal;     //zmienne przechowujące wartości zerujące sensor
 
   HAL_Init();
   SystemClock_Config();
@@ -237,6 +239,7 @@ int main(void)
     printf("\t v - Once voltage\n");
     printf("\t c - Continues magnetic field and temperature\n");
     printf("Calibration/settings:\n");
+    printf("\t k - Calibrate magnetic sensor\n");
     printf("\t a - Show all config parameters\n");
     printf("\t s - Set sensitivity\n");
     printf("\t o - Set offset\n");
@@ -277,6 +280,23 @@ int main(void)
         break;
       case 'c':
         printf("Continues measurement:\n");
+        break;
+      case 'k':
+        WriteRegMid(REG_I2C_ComandStatus, SINGLE_MEASURE_MAGNETIC);
+        WriteRegHigh(REG_I2C_ComandStatus, SINGLE_MEASURE_MAGNETIC);
+        ReadRegMid(REG_I2CX2, calibration_mid, 6);
+        ReadRegHigh(REG_I2CX2, calibration_high, 6);
+        xm_cal = (calibration_mid[0] << 8) | calibration_mid[1];
+        ym_cal = (calibration_mid[2] << 8) | calibration_mid[3];
+        zm_cal = (calibration_mid[4] << 8) | calibration_mid[5];
+        xh_cal = (calibration_high[0] << 8) | calibration_high[1];
+        yh_cal = (calibration_high[2] << 8) | calibration_high[3];
+        zh_cal = (calibration_high[4] << 8) | calibration_high[5];
+        printf("Sensor calibrated, calibration values:\n");
+        printf("Medium:\n");
+        printf("X: %05i, Y: %05i, Z: %05i\n", xm_cal, ym_cal, zm_cal);
+        printf("High:\n");
+        printf("X: %05i, Y: %05i, Z: %05i\n", xh_cal, yh_cal, zh_cal);
         break;
       case 'a':
         printf("All configuration values:\n");
