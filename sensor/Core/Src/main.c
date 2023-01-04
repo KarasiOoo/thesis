@@ -268,7 +268,12 @@ int main(void)
         ReadTemperature(2);
         break;
       case 'v':
+        WriteRegMid(REG_I2C_ComandStatus, SINGLE_MEASURE_VOLTAGE);
+        WriteRegHigh(REG_I2C_ComandStatus, SINGLE_MEASURE_VOLTAGE);
+        HAL_Delay(1);
         printf("Measured value of voltage:\n");
+        ReadVoltage(1);
+        ReadVoltage(2);
         break;
       case 'c':
         printf("Continues measurement:\n");
