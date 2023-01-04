@@ -203,8 +203,35 @@ void ReadVoltage(uint8_t sensor)
   return;
 }
 
+void ReadStatus(uint8_t sensor)
+{
+  I2C_HandleTypeDef i2c_address;
+  uint8_t dev_address;
 
+  uint8_t status;
 
+  if(sensor == 1)
+  {
+    i2c_address = hi2c1;
+    dev_address = MEDIUM_SENSOR;
+    printf("Medium range sensor: \n");
+  }
+  else if (sensor == 2)
+  {
+    i2c_address = hi2c2;
+    dev_address = HIGH_SENSOR;
+    printf("High range sensor: \n");
+  }
+  else
+  {
+    printf("Wrong number given!\n");
+    return;
+  }
+
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_I2C_ComandStatus, 1, &status, 1, HAL_MAX_DELAY);
+
+  printf("Status: %02x\n", status);
+}
 
 int main(void)
 {
@@ -239,6 +266,7 @@ int main(void)
     printf("\t v - Once voltage\n");
     printf("\t c - Continues magnetic field and temperature\n");
     printf("Calibration/settings:\n");
+    printf("\t c - Show status register\n");
     printf("\t k - Calibrate magnetic sensor\n");
     printf("\t a - Show all config parameters\n");
     printf("\t s - Set sensitivity\n");
@@ -280,6 +308,10 @@ int main(void)
         break;
       case 'c':
         printf("Continues measurement:\n");
+        break;
+      case 'c':
+        ReadStatus(1);
+        ReadStatus(2);
         break;
       case 'k':
         WriteRegMid(REG_I2C_ComandStatus, SINGLE_MEASURE_MAGNETIC);
