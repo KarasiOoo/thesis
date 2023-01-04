@@ -33,21 +33,25 @@ return 1;
 void WriteRegMid(uint8_t reg_address,  uint8_t command)
 {
   HAL_I2C_Mem_Write(&hi2c1, MEDIUM_SENSOR, reg_address, 1, &command, 1, HAL_MAX_DELAY);
+  return;
 }
 
 void ReadRegMid(uint8_t reg_address, uint8_t* aquired_data, uint8_t lenght)
 {
   HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, reg_address, 1, aquired_data, lenght, HAL_MAX_DELAY);
+  return;
 }
 
 void WriteRegHigh(uint8_t reg_address,  uint8_t command)
 {
   HAL_I2C_Mem_Write(&hi2c2, HIGH_SENSOR, reg_address, 1, &command, 1, HAL_MAX_DELAY);
+  return;
 }
 
 void ReadRegHigh(uint8_t reg_address, uint8_t* aquired_data, uint8_t lenght)
 {
   HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, reg_address, 1, aquired_data, lenght, HAL_MAX_DELAY);
+  return;
 }
 
 void ReadMagnetic(uint8_t sensor)
@@ -196,6 +200,7 @@ void ReadVoltage(uint8_t sensor)
   HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_I2C_ComandStatus, 1, memory, 2, HAL_MAX_DELAY);
   v_val = memory[10] << 8 | memory[11];
   printf("%05i\n", v_val);
+  return;
 }
 
 
