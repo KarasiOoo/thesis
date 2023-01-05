@@ -61,6 +61,7 @@ void ReadMagnetic(uint8_t sensor)
   
   uint8_t memory[12];
   int16_t x_val, y_val, z_val;
+
   if(sensor == 1)
   {
     i2c_address = hi2c1;
@@ -261,16 +262,16 @@ int main(void)
     uint8_t action, new_task;
     printf("Choose action:\n");
     printf("Measure:\n");
-    printf("\t m - Once magnetic field\n");
-    printf("\t t - Once temperature\n");
-    printf("\t v - Once voltage\n");
-    printf("\t c - Continues magnetic field and temperature\n");
+    printf("\t m - Once magnetic field.\n");
+    printf("\t t - Once temperature.\n");
+    printf("\t v - Once voltage.\n");
+    printf("\t b - Continues magnetic field and temperature(NY).\n");
     printf("Calibration/settings:\n");
-    printf("\t c - Show status register\n");
-    printf("\t k - Calibrate magnetic sensor\n");
-    printf("\t a - Show all config parameters\n");
-    printf("\t s - Set sensitivity\n");
-    printf("\t o - Set offset\n");
+    printf("\t c - Show status register.\n");
+    printf("\t k - Calibrate magnetic sensor.\n");
+    printf("\t a - Show all config parameters(NY).\n");
+    printf("\t s - Set sensitivity(NY).\n");
+    printf("\t o - Set offset(NY).\n");
     printf("\t g - Set gain\n");
     printf("\t i - Increase gain\n");
     printf("\t d - Decrease gain\n");
@@ -306,7 +307,7 @@ int main(void)
         ReadVoltage(1);
         ReadVoltage(2);
         break;
-      case 'c':
+      case 'b':
         printf("Continues measurement:\n");
         break;
       case 'c':
