@@ -330,7 +330,7 @@ int main(void)
         printf("All configuration values:\n");
         break;
       case 's':
-        printf("Sensetivity settings.\n");
+        printf("Sensitivity settings.\n");
         break;
       case 'g':
         printf("Gain settings.\n");
