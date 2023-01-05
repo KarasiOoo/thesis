@@ -281,7 +281,7 @@ void SetGain()
 
 int main(void)
 {
-  uint8_t v_en = 1;
+  uint8_t v_en = 1;                                           //flaga czy mierzenie napięcia jest włączone czy nie
   uint8_t calibration_mid[6], calibration_high[6];
   int16_t xm_cal, ym_cal, zm_cal, xh_cal, yh_cal, zh_cal;     //zmienne przechowujące wartości zerujące sensor
 
