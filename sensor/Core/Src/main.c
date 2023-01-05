@@ -281,8 +281,8 @@ int main(void)
     switch(action)
     {
       case 'm':
-        WriteRegMid(REG_I2C_ComandStatus, SINGLE_MEASURE_MT);
-        WriteRegHigh(REG_I2C_ComandStatus, SINGLE_MEASURE_MT);
+        WriteRegMid(REG_I2C_ComandStatus, SINGLE_MEASURE_MAGNETIC);
+        WriteRegHigh(REG_I2C_ComandStatus, SINGLE_MEASURE_MAGNETIC);
         printf("Measured values of magnetic field:\n");
         ReadMagnetic(1);
         ReadMagnetic(2);
