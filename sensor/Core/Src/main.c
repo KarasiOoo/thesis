@@ -263,6 +263,7 @@ int main(void)
     printf("\t t - Once temperature.\n");
     printf("\t v - Once voltage.\n");
     printf("\t b - Continues magnetic field and temperature(NY).\n");
+    printf("\t z - Reset.\n");
     printf("Calibration/settings:\n");
     printf("\t c - Show status register.\n");
     printf("\t k - Calibrate magnetic sensor.\n");
@@ -304,6 +305,13 @@ int main(void)
         break;
       case 'b':
         printf("Continues measurement:\n");
+        break;
+      case 'z':
+        printf("Reset in progress...\n");
+        WriteRegMid(REG_I2C_ComandStatus, RESET_SENSOR);
+        WriteRegHigh(REG_I2C_ComandStatus, RESET_SENSOR);
+        HAL_Delay(300);
+        printf("Reset done\n");
         break;
       case 'c':
         ReadStatus(1);
