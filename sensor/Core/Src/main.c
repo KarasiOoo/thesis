@@ -232,6 +232,9 @@ void ReadStatus(uint8_t sensor)
   HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_I2C_ComandStatus, 1, &status, 1, HAL_MAX_DELAY);
 
   printf("Status: %02x\n", status);
+  return;
+}
+
 void SetGain()
 {
   I2C_HandleTypeDef i2c_address;
