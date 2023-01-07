@@ -449,6 +449,7 @@ int main(void)
       case 'k':
         WriteRegMid(REG_I2C_ComandStatus, SINGLE_MEASURE_MAGNETIC);
         WriteRegHigh(REG_I2C_ComandStatus, SINGLE_MEASURE_MAGNETIC);
+        HAL_Delay(10);
         ReadRegMid(REG_I2CX2, calibration_mid, 6);
         ReadRegHigh(REG_I2CX2, calibration_high, 6);
         xm_cal = (calibration_mid[0] << 8) | calibration_mid[1];
@@ -457,6 +458,14 @@ int main(void)
         xh_cal = (calibration_high[0] << 8) | calibration_high[1];
         yh_cal = (calibration_high[2] << 8) | calibration_high[3];
         zh_cal = (calibration_high[4] << 8) | calibration_high[5];
+        
+        xm_cal = BinaryToDecimal(xm_cal);
+        ym_cal = BinaryToDecimal(ym_cal);
+        zm_cal = BinaryToDecimal(zm_cal);
+        xh_cal = BinaryToDecimal(xh_cal);
+        yh_cal = BinaryToDecimal(yh_cal);
+        zh_cal = BinaryToDecimal(zh_cal);
+
         printf("Sensor calibrated, calibration values:\n");
         printf("Medium:\n");
         printf("X: %05i, Y: %05i, Z: %05i\n", xm_cal, ym_cal, zm_cal);
