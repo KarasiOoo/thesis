@@ -297,6 +297,59 @@ void SetGain()
   return;
 }
 
+void SetResolution()
+{
+  I2C_HandleTypeDef i2c_address;
+  uint8_t dev_address, sensor, resolution;
+  uint16_t reg;
+  uint8_t x_res[2], y_res[2], z_res[2];
+
+  printf("Select which sensor you want to configure: 1 - mid, 2 - high.\n");
+  HAL_UART_Receive(&huart2, &sensor, 1, HAL_MAX_DELAY);
+
+  if(sensor == '1')
+  {
+    i2c_address = hi2c1;
+    dev_address = MEDIUM_SENSOR;
+    printf("Medium sensor: \n");
+  }
+  else if (sensor == '2')
+  {
+    i2c_address = hi2c2;
+    dev_address = HIGH_SENSOR;
+    printf("High sensor: \n");
+  }
+  else
+  {
+    printf("Wrong number given!\n");
+    return;
+  }
+
+  printf("Set higher X bit: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &x_res[1], 1, HAL_MAX_DELAY);
+  printf("Set lower X bit: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &x_res[0], 1, HAL_MAX_DELAY);
+  printf("Set higher Y bit: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &y_res[1], 1, HAL_MAX_DELAY);
+  printf("Set lower Y bit: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &y_res[0], 1, HAL_MAX_DELAY);
+  printf("Set higher Z bit: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &z_res[1], 1, HAL_MAX_DELAY);
+  printf("Set lower Z bit: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &z_res[0], 1, HAL_MAX_DELAY);
+
+  resolution = ((((x_res[1] << 5 | x_res[0] << 4) | y_res[1] << 3) | y_res[0] << 2) | z_res[1] << 1) | z_res[0];
+
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF3, 1, &reg, 2, HAL_MAX_DELAY);
+  reg = reg & (0b11000000 << 5);
+  reg = reg | (resolution << 5);
+  printf("Value which will be sent to the reg: %04x \n", reg);
+  HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF3, 1, &reg, 2, HAL_MAX_DELAY);
+  printf("Set done.\n");
+  return;
+
+}
+
 int main(void)
 {
   uint8_t v_en = 1;                                           //flaga czy mierzenie napięcia jest włączone czy nie
@@ -408,6 +461,7 @@ int main(void)
         break;
       case 'r':
         printf("Resolution settings.\n");
+        SetResolution();
         break;
       case 'f':
         printf("Burst mode settings.\n");
