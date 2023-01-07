@@ -253,7 +253,7 @@ void ReadStatus(uint8_t sensor)
 void SetGain()
 {
   I2C_HandleTypeDef i2c_address;
-  uint8_t dev_address, gain_sel_all, sensor, status;
+  uint8_t dev_address, gain_sel_all, sensor, reg;
 
   uint8_t gain_sel[4];
 
@@ -288,10 +288,10 @@ void SetGain()
   HAL_UART_Receive(&huart2, &gain_sel[0], 1, HAL_MAX_DELAY);
 
   gain_sel_all = (((gain_sel[3] << 3) | gain_sel[2] << 2) | gain_sel[1] << 1) | gain_sel[0];      //0b0000 xxxx
-  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF1, 1, &status, 1, HAL_MAX_DELAY);
-  status = status & 0b00001111;
-  gain_sel_all = gain_sel_all << 4 | status;
-  printf("Value which will be sent to the register: %02x \n", gain_sel_all);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF1, 1, &reg, 1, HAL_MAX_DELAY);
+  reg = reg & 0b00001111;
+  gain_sel_all = gain_sel_all << 4 | reg;
+  printf("Value which will be sent to the reg: %02x \n", gain_sel_all);
   HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF1, 1, &gain_sel_all, 1, HAL_MAX_DELAY);
   printf("Set done.\n");
   return;
@@ -381,7 +381,7 @@ int main(void)
     printf("\t b - Continues magnetic field and temperature(NY).\n");
     printf("\t z - Reset.\n");
     printf("Calibration/settings:\n");
-    printf("\t c - Show status register.\n");
+    printf("\t c - Show status reg.\n");
     printf("\t k - Calibrate magnetic sensor.\n");
     printf("\t a - Show all config parameters(NY).\n");
     printf("\t s - Set sensitivity(NY).\n");
@@ -467,12 +467,14 @@ int main(void)
         printf("Burst mode settings.\n");
         break;
       case 'w':
-        if(v_en == 1)
+        if(v_en == 0)
           {
+            v_en = 1;
             printf("Voltage measurement enabled.\n");
           }
         else
           {
+            v_en = 0;
             printf("Voltage measurement disabled.\n");
           }
           break;
