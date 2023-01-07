@@ -54,6 +54,21 @@ void ReadRegHigh(uint8_t reg_address, uint8_t* aquired_data, uint8_t lenght)
   return;
 }
 
+int16_t BinaryToDecimal (int16_t binary)
+{
+  int16_t decimal, last_digit;
+  uint8_t base = 1;
+
+  while(binary)
+  {
+    last_digit = binary % 10;
+    binary = binary / 10;
+    decimal += last_digit * base;
+    base = base * 2;
+  }
+  return decimal;
+}
+
 void ReadMagnetic()
 {
   I2C_HandleTypeDef i2c_address;
