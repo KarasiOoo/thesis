@@ -422,8 +422,7 @@ int main(void)
         WriteRegMid(REG_I2C_ComandStatus, SINGLE_MEASURE_TEMPERATURE);
         WriteRegHigh(REG_I2C_ComandStatus, SINGLE_MEASURE_TEMPERATURE);
         printf("Measured value of temperature:\n");
-        ReadTemperature(1);
-        ReadTemperature(2);
+        ReadTemperature();
         break;
       case 'v':
         WriteRegMid(REG_I2C_ComandStatus, SINGLE_MEASURE_VOLTAGE);
