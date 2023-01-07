@@ -90,8 +90,12 @@ void ReadMagnetic()
   x_val = memory[2] << 8 | memory[3];
   y_val = memory[4] << 8 | memory[5];
   z_val = memory[6] << 8 | memory[7];
+  x_valf = x_val * 1000 / 400;
+  y_valf = y_val * 1000 / 400;
+  z_valf = z_val * 1000 / 400;
 
   printf("X: %05i,\t Y: %05i,\t Z: %05i\n", x_val, y_val, z_val);
+  printf("X: %05ld,\t Y: %05ld,\t Z: %05ld (uT)\n", x_valf, y_valf, z_valf);
   return;
 }
 
