@@ -131,7 +131,7 @@ void ReadTemperature()
   uint8_t dev_address, sensor;
 
   uint8_t memory[2];
-  float t_valf;
+  int16_t t_val;
 
   printf("Select which sensor you want to perform measurement: 1 - mid, 2 - high.\n");
   HAL_UART_Receive(&huart2, &sensor, 1, HAL_MAX_DELAY);
@@ -156,10 +156,11 @@ void ReadTemperature()
 
   HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_I2CT2, 1, memory, 2, HAL_MAX_DELAY);
 
-  t_valf = memory[0] << 8 | memory[1];
-  t_valf = t_valf / 50;
+  t_val = memory[0] << 8 | memory[1];
+  t_val = (t_val) / 50;
 
-  printf("Temperature: %3.2f\n", t_valf);
+  printf("Temperature: %d\n", t_val);
+
   return;
 
 }
