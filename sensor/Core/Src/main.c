@@ -172,8 +172,7 @@ void ReadMagneticTemperature()
   
   uint8_t memory[12];
   uint8_t status, sensor;
-  int16_t x_val, y_val, z_val;//, t_val;
-  //float x_valf, y_valf, z_valf, t_valf;
+  int16_t measured_value_x, measured_value_y, measured_value_z;//, t_val;
   float t_val;
 
   printf("Select which sensor you want to perform measurement: 1 - mid, 2 - high.\n");
@@ -200,13 +199,13 @@ void ReadMagneticTemperature()
   HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_I2C_ComandStatus, 1, memory, 12, HAL_MAX_DELAY);
 
   status = memory[0];
-  x_val = memory[2] << 8 | memory[3];
-  y_val = memory[4] << 8 | memory[5];
-  z_val = memory[6] << 8 | memory[7];
+  measured_value_x = memory[2] << 8 | memory[3];
+  measured_value_y = memory[4] << 8 | memory[5];
+  measured_value_z = memory[6] << 8 | memory[7];
   t_val = ((memory[8] << 8) | memory[9]);
   t_val = t_val / 50;
 
-  printf("Status: %02x,\t X:%05i,\t Y:%05i,\t Z:%05i,\t T:%3.2f,\n", status, x_val, y_val, z_val, t_val);
+  printf("Status: %02x,\t X:%05i,\t Y:%05i,\t Z:%05i,\t T:%3.2f,\n", status, measured_value_x, measured_value_y, measured_value_z, t_val);
   return;
 }
 
