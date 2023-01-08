@@ -327,8 +327,9 @@ void SetResolution()
 {
   I2C_HandleTypeDef i2c_address;
   uint8_t dev_address, sensor, resolution;
-  uint16_t reg;
+  uint8_t reg_r[2];
   uint8_t x_res[2], y_res[2], z_res[2];
+  uint16_t reg_w;
 
   printf("Select which sensor you want to configure: 1 - mid, 2 - high.\n");
   HAL_UART_Receive(&huart2, &sensor, 1, HAL_MAX_DELAY);
@@ -366,11 +367,12 @@ void SetResolution()
 
   resolution = ((((x_res[1] << 5 | x_res[0] << 4) | y_res[1] << 3) | y_res[0] << 2) | z_res[1] << 1) | z_res[0];
 
-  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF3, 1, &reg, 2, HAL_MAX_DELAY);
-  reg = reg & (0b11000000 << 5);
-  reg = reg | (resolution << 5);
-  printf("Value which will be sent to the reg: %04x \n", reg);
-  HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF3, 1, &reg, 2, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF3, 1, reg_r, 2, HAL_MAX_DELAY);
+  reg_w = (reg_r[1] << 8) | reg_r[0];
+  reg_w = reg_w & (0b11000000 << 5);
+  reg_w = reg_w | (resolution << 5);
+  printf("Value which will be sent to the reg: %04x \n", reg_w);
+  HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF3, 1, &reg_w, 2, HAL_MAX_DELAY);
   printf("Set done.\n");
   return;
 
