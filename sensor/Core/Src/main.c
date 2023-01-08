@@ -416,7 +416,7 @@ int main(void)
     printf("\t s - Set sensitivity(NY).\n");
     printf("\t o - Set offset(NY).\n");
     printf("\t g - Set gain.\n");
-    printf("\t r - Set resolution for magnetic measurements(NY).\n");
+    printf("\t r - Set resolution for magnetic measurements.\n");
     printf("\t f - Set frequency of measurement for Burst Mode (BurstDataRate)(NY).\n");
     printf("\t w - Enable/disable voltage measurement(NY).\n");
     printf("What do you want to do?\t\n");
