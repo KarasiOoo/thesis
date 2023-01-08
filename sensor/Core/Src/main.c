@@ -241,7 +241,7 @@ void ReadVoltage(uint8_t sensor)
   //HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_I2C_ComandStatus, 1, measured_voltage, 2, HAL_MAX_DELAY);
   HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_I2C_ComandStatus, 1, memory, 2, HAL_MAX_DELAY);
   v_val = memory[10] << 8 | memory[11];
-  printf("%05i\n", v_val);
+  printf("%02i\n", v_val);
   return;
 }
 
