@@ -72,12 +72,13 @@ int16_t BinaryToDecimal (int16_t binary)
 void ReadMagnetic()
 {
   I2C_HandleTypeDef i2c_address;
-  uint8_t dev_address;
+  uint8_t dev_address, sensor;
   
   uint8_t memory[12];
-  int16_t x_val, y_val, z_val;
-  int32_t x_valf, y_valf, z_valf;
-  uint8_t sensor;
+  int16_t measured_value_x, measured_value_y, measured_value_z;
+  int16_t measured_decimal_value_x, measured_decimal_value_y, measured_decimal_value_z;
+  int32_t measured_value_xf, measured_value_yf, measured_value_zf;
+  int16_t calibration_x, calibration_y, calibration_z;
 
   printf("Select which sensor you want to perform measurement: 1 - mid, 2 - high.\n");
   HAL_UART_Receive(&huart2, &sensor, 1, HAL_MAX_DELAY); 
@@ -102,15 +103,25 @@ void ReadMagnetic()
   
   HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_I2C_ComandStatus, 1, memory, 12, HAL_MAX_DELAY);
 
-  x_val = memory[2] << 8 | memory[3];
-  y_val = memory[4] << 8 | memory[5];
-  z_val = memory[6] << 8 | memory[7];
-  x_valf = x_val * 1000 / 400;
-  y_valf = y_val * 1000 / 400;
-  z_valf = z_val * 1000 / 400;
+  measured_value_x = memory[2] << 8 | memory[3];
+  measured_value_y = memory[4] << 8 | memory[5];
+  measured_value_z = memory[6] << 8 | memory[7];
 
-  printf("X: %05i,\t Y: %05i,\t Z: %05i\n", x_val, y_val, z_val);
-  printf("X: %05ld,\t Y: %05ld,\t Z: %05ld (uT)\n", x_valf, y_valf, z_valf);
+  measured_decimal_value_x = BinaryToDecimal(measured_value_x);
+  measured_decimal_value_y = BinaryToDecimal(measured_value_y);
+  measured_decimal_value_z = BinaryToDecimal(measured_value_z);
+
+  measured_value_xf = measured_value_x * 1000 / 400;
+  measured_value_yf = measured_value_y * 1000 / 400;
+  measured_value_zf = measured_value_z * 1000 / 400;
+
+  measured_value_xf = measured_value_xf - calibration_x;
+  measured_value_yf = measured_value_yf - calibration_y;
+  measured_value_zf = measured_value_zf - calibration_z;
+
+  printf("X: %05i,\t Y: %05i,\t Z: %05i (raw-binary)\n", measured_value_x, measured_value_y, measured_value_z);
+  printf("X: %05i,\t Y: %05i,\t Z: %05i (decimal)\n", measured_decimal_value_x, measured_decimal_value_y, measured_decimal_value_z);
+  printf("X: %05ld,\t Y: %05ld,\t Z: %05ld (uT)\n", measured_value_xf, measured_value_yf, measured_value_zf);
   return;
 }
 
