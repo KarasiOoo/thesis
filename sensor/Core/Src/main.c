@@ -245,6 +245,61 @@ void ReadVoltage(uint8_t sensor)
   return;
 }
 
+void ReadMagneticBurst()
+{
+  uint8_t burst, burst_break, state;
+  uint8_t memory_m[12], memory_h[12];
+  int16_t measured_value_xm, measured_value_ym, measured_value_zm, measured_value_xh, measured_value_yh, measured_value_zh;
+  int32_t measured_converted_value_xm, measured_converted_value_ym, measured_converted_value_zm;
+  int32_t measured_converted_value_xh, measured_converted_value_yh, measured_converted_value_zh;
+
+  burst = 0;
+  burst_break = 0;
+  state = 1;
+
+  WriteRegMid(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
+  WriteRegHigh(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
+  HAL_UART_Receive(&huart2, &burst, 1, 200); 
+
+  printf("   Mid:, \t High:\n");
+
+  while(state == 1)
+  {
+    HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, REG_I2C_ComandStatus, 1, memory_m, 12, HAL_MAX_DELAY);
+    HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, REG_I2C_ComandStatus, 1, memory_h, 12, HAL_MAX_DELAY);
+
+    measured_value_xm = memory_m[2] << 8 | memory_m[3];
+    measured_value_ym = memory_m[4] << 8 | memory_m[5];
+    measured_value_zm = memory_m[6] << 8 | memory_m[7];
+    measured_value_xh = memory_h[2] << 8 | memory_h[3];
+    measured_value_yh = memory_h[4] << 8 | memory_h[5];
+    measured_value_zh = memory_h[6] << 8 | memory_h[7];
+
+    measured_converted_value_xm = measured_value_xm * 1000 / 400;
+    measured_converted_value_ym = measured_value_ym * 1000 / 400;
+    measured_converted_value_zm = measured_value_zm * 1000 / 400;
+    measured_converted_value_xh = measured_value_xh * 1000 / 400;
+    measured_converted_value_yh = measured_value_yh * 1000 / 400;
+    measured_converted_value_zh = measured_value_zh * 1000 / 400;
+
+
+    printf("X: %06ld,\t %06ld\n", measured_converted_value_xm, measured_converted_value_xh);
+    printf("Y: %06ld,\t %06ld\n", measured_converted_value_ym, measured_converted_value_yh);
+    printf("Z: %06ld,\t %06ld\n\n", measured_converted_value_zm, measured_converted_value_zh);
+
+    HAL_UART_Receive(&huart2, &burst_break, 1, 150); 
+    if(burst != burst_break)
+    {
+      state = 0;
+    }
+  }
+  printf("'%i,\t%i'", burst, burst_break);
+  printf("Measurement finished.\n");
+  WriteRegMid(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
+  WriteRegHigh(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
+  return;
+}
+
 void ReadStatus(uint8_t sensor)
 {
   I2C_HandleTypeDef i2c_address;
@@ -406,7 +461,7 @@ int main(void)
     printf("\t m - Once magnetic field.\n");
     printf("\t t - Once temperature.\n");
     printf("\t v - Once voltage.\n");
-    printf("\t b - Continues magnetic field and temperature(NY).\n");
+    printf("\t b - Continues magnetic field and temperature.\n");
     printf("\t z - Reset.\n");
     printf("Calibration/settings:\n");
     printf("\t c - Show status reg.\n");
@@ -447,6 +502,7 @@ int main(void)
         break;
       case 'b':
         printf("Continues measurement:\n");
+        ReadMagneticBurst();
         break;
       case 'z':
         printf("Reset in progress...\n");
