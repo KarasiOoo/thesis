@@ -331,6 +331,73 @@ void ReadStatus(uint8_t sensor)
   return;
 }
 
+void ReadConfig()
+{
+  I2C_HandleTypeDef i2c_address;
+  uint8_t dev_address, sensor;
+
+  uint8_t gain_sel, burst_data_rate, resolution_x, resolution_y, resolution_z;
+  uint8_t resolution[2], offset_x[2], offset_y[2], offset_z[2], sensitivity_xy[2], sensitivity_z[2];
+  uint16_t offset_x16, offset_y16, offset_z16, sensitivity_xy16, sensitivity_z16, resolution_y16;
+
+  printf("Select which sensor you want to perform measurement: 1 - mid, 2 - high.\n");
+  HAL_UART_Receive(&huart2, &sensor, 1, HAL_MAX_DELAY); 
+
+  if(sensor == '1')
+  {
+    i2c_address = hi2c1;
+    dev_address = MEDIUM_SENSOR;
+    printf("Medium range sensor: \n");
+  }
+  else if (sensor == '2')
+  {
+    i2c_address = hi2c2;
+    dev_address = HIGH_SENSOR;
+    printf("High range sensor: \n");
+  }
+  else
+  {
+    printf("Wrong number given!\n");
+    return;
+  }
+
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF1, 1, gain_sel, 1, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF2, 1, burst_data_rate, 1, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF3, 1, resolution, 2, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_OffsetX, 1, offset_x, 2, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_OffsetY, 1, offset_y, 2, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_OffsetZ, 1, offset_z, 2, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_SensXY, 1, sensitivity_xy, 2, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_SensZ, 1, sensitivity_z, 2, HAL_MAX_DELAY);
+
+  gain_sel = gain_sel >> 4;
+  burst_data_rate = burst_data_rate & 0b00111111;
+  resolution_x = (resolution[0] >> 5) & TWO_BITS;
+  //resolution_y = ((resolution[1] << 1) | (resolution[0] >> 7)) & TWO_BITS;
+  resolution_y = ((resolution[1] << 8 | resolution[0]) >> 7) & TWO_BITS;
+  resolution_z = (resolution[1] >> 1) & TWO_BITS;
+  //offset_x16 = (offset_x[1] << 8) | offset_x[0];
+  offset_x16 = (offset_x[0] << 8) | offset_x[1];
+  offset_y16 = (offset_y[1] << 8) | offset_y[0];
+  offset_z16 = (offset_z[1] << 8) | offset_z[0];
+  sensitivity_xy16 = (sensitivity_xy[1] << 8) | sensitivity_xy[0];
+  //sensitivity_z16 = (sensitivity_z[1] << 8 ) | sensitivity_z[0];
+  sensitivity_z16 = (sensitivity_z[0] << 8 ) | sensitivity_z[1];
+
+  printf("Gain:\t %02x\n", gain_sel);
+  printf("Burst data rate: %02x\n", burst_data_rate);
+  printf("Resolution X: %02x\n", resolution_x);
+  printf("Resolution Y: %02x\n", resolution_y);
+  printf("Resolution Z: %02x\n", resolution_z);
+  printf("Offset X:\t %04x\n", offset_x16);
+  printf("Offset Y:\t %04x\n", offset_y16);
+  printf("Offset Z:\t %04x\n", offset_z16);
+  printf("Sensitivity XY: %04x\n", sensitivity_xy16);
+  printf("Sensitivity Z: %04x\n", sensitivity_z16);
+
+  return;
+}
+
 void SetGain()
 {
   I2C_HandleTypeDef i2c_address;
@@ -466,7 +533,7 @@ int main(void)
     printf("Calibration/settings:\n");
     printf("\t c - Show status reg.\n");
     printf("\t k - Calibrate magnetic sensor.\n");
-    printf("\t a - Show all config parameters(NY).\n");
+    printf("\t a - Show all config parameters.\n");
     printf("\t s - Set sensitivity(NY).\n");
     printf("\t o - Set offset(NY).\n");
     printf("\t g - Set gain.\n");
@@ -543,6 +610,7 @@ int main(void)
         break;
       case 'a':
         printf("All configuration values:\n");
+        ReadConfig();
         break;
       case 's':
         printf("Sensitivity settings.\n");
