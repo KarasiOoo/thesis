@@ -87,12 +87,18 @@ void ReadMagnetic()
   {
     i2c_address = hi2c1;
     dev_address = MEDIUM_SENSOR;
+    calibration_x = xm_cal;
+    calibration_y = ym_cal;
+    calibration_z = zm_cal;
     printf("Medium range sensor: \n");
   }
   else if (sensor == '2')
   {
     i2c_address = hi2c2;
     dev_address = HIGH_SENSOR;
+    calibration_x = xh_cal;
+    calibration_y = yh_cal;
+    calibration_z = zh_cal;
     printf("High range sensor: \n");
   }
   else
