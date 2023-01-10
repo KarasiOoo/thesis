@@ -18,6 +18,8 @@ static void MX_I2C1_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_USART2_UART_Init(void);
 
+int16_t xm_cal, ym_cal, zm_cal, xh_cal, yh_cal, zh_cal;
+
 int __io_putchar(int ch)
 {
   if(ch == '\n')
@@ -253,7 +255,7 @@ void ReadVoltage(uint8_t sensor)
 
 void ReadMagneticBurst()
 {
-  uint8_t burst, burst_break, state;
+  uint8_t burst, burst_break, state, data_ready_m, data_ready_h, print_m_ready, print_h_ready, hal_error;
   uint8_t memory_m[12], memory_h[12];
   int16_t measured_value_xm, measured_value_ym, measured_value_zm, measured_value_xh, measured_value_yh, measured_value_zh;
   int32_t measured_converted_value_xm, measured_converted_value_ym, measured_converted_value_zm;
@@ -431,9 +433,10 @@ void ReadConfig()
 void SetGain()
 {
   I2C_HandleTypeDef i2c_address;
-  uint8_t dev_address, gain_sel_all, sensor, reg;
-
+  uint8_t dev_address, sensor, reg[2];
+  uint16_t gain_sel_all, reg16;
   uint8_t gain_sel[4];
+  uint8_t hal_error;
 
   printf("Select which sensor you want to configure: 1 - mid, 2 - high.\n");
   HAL_UART_Receive(&huart2, &sensor, 1, HAL_MAX_DELAY); 
