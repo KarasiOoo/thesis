@@ -750,12 +750,12 @@ int main(void)
         yh_cal = (calibration_high[2] << 8) | calibration_high[3];
         zh_cal = (calibration_high[4] << 8) | calibration_high[5];
         
-        xm_cal = BinaryToDecimal(xm_cal);
-        ym_cal = BinaryToDecimal(ym_cal);
-        zm_cal = BinaryToDecimal(zm_cal);
-        xh_cal = BinaryToDecimal(xh_cal);
-        yh_cal = BinaryToDecimal(yh_cal);
-        zh_cal = BinaryToDecimal(zh_cal);
+        xm_cal = xm_cal * 1000 / 400;
+        ym_cal = ym_cal * 1000 / 400;
+        zm_cal = zm_cal * 1000 / 400;
+        xh_cal = xh_cal * 1000 / 400;
+        yh_cal = yh_cal * 1000 / 400;
+        zh_cal = zh_cal * 1000 / 400;
 
         printf("Sensor calibrated, calibration values:\n");
         printf("Medium:\n");
