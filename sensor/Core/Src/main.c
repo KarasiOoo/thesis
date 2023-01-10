@@ -459,6 +459,10 @@ void SetGain()
   printf("Set the lowest bit for bit selection: (0 or 1)\n");
   HAL_UART_Receive(&huart2, &gain_sel[0], 1, HAL_MAX_DELAY);
 
+  gain_sel[3] = gain_sel[3] - 0x30;
+  gain_sel[2] = gain_sel[2] - 0x30;
+  gain_sel[1] = gain_sel[1] - 0x30;
+  gain_sel[0] = gain_sel[0] - 0x30;
 
   gain_sel_all = 0;
   gain_sel_all = (((gain_sel[3] << 3) | gain_sel[2] << 2) | gain_sel[1] << 1) | gain_sel[0];      //0b0000 xxxx
@@ -632,7 +636,13 @@ void SetResolution()
   printf("Set lower Z bit: (0 or 1)\n");
   HAL_UART_Receive(&huart2, &z_res[0], 1, HAL_MAX_DELAY);
 
-  resolution = ((((x_res[1] << 5 | x_res[0] << 4) | y_res[1] << 3) | y_res[0] << 2) | z_res[1] << 1) | z_res[0];
+  x_res[1] = x_res[1] - 0x30;
+  x_res[0] = x_res[0] - 0x30;
+  y_res[1] = y_res[1] - 0x30;
+  y_res[0] = y_res[0] - 0x30;
+  z_res[1] = z_res[1] - 0x30;
+  z_res[0] = z_res[0] - 0x30;
+  resolution = ((((z_res[1] << 5 | z_res[0] << 4) | y_res[1] << 3) | y_res[0] << 2) | x_res[1] << 1) | x_res[0];
 
   HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF3, 1, reg_r, 2, HAL_MAX_DELAY);
   reg_w = (reg_r[1] << 8) | reg_r[0];
