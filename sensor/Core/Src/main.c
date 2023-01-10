@@ -701,9 +701,9 @@ int main(void)
     printf("\t s - Set sensitivity(NY).\n");
     printf("\t o - Set offset(NY).\n");
     printf("\t g - Set gain.\n");
+    printf("\t f - Set Digital Filter, average from x measurement,\n");
     printf("\t r - Set resolution for magnetic measurements.\n");
-    printf("\t f - Set frequency of measurement for Burst Mode (BurstDataRate)(NY).\n");
-    printf("\t w - Enable/disable voltage measurement(NY).\n");
+    printf("\t u - Set frequency of measurement for Burst Mode (BurstDataRate)(NY).\n");
     printf("What do you want to do?\t\n");
     printf("\n");
 
@@ -777,7 +777,10 @@ int main(void)
         ReadConfig();
         break;
       case 's':
+        //uint8_t sensitivity_xy[2];
         printf("Sensitivity settings.\n");
+        //HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_SensXY, 1, sensitivity_xy, 2, HAL_MAX_DELAY);
+        //printf("Odczytane: %x\n", sensitivity_xy);
         break;
       case 'g':
         printf("Gain settings.\n");
