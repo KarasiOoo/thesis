@@ -516,6 +516,58 @@ void SetBurstDataRate()
   printf("Set done.\n");
   return;
 }
+
+void SetDigFilter()
+{
+  I2C_HandleTypeDef i2c_address;
+  uint8_t dev_address, sensor, hal_error;
+
+  uint8_t dig_filter[3];
+  uint8_t reg[2];
+  uint16_t dig_filter_all, reg16;
+
+  printf("Select which sensor you want to configure: 1 - mid, 2 - high.\n");
+  HAL_UART_Receive(&huart2, &sensor, 1, HAL_MAX_DELAY);
+
+  if(sensor == '1')
+  {
+    i2c_address = hi2c1;
+    dev_address = MEDIUM_SENSOR;
+    printf("Medium sensor: \n");
+  }
+  else if (sensor == '2')
+  {
+    i2c_address = hi2c2;
+    dev_address = HIGH_SENSOR;
+    printf("High sensor: \n");
+  }
+  else
+  {
+    printf("Wrong number given!\n");
+    return;
+  }
+
+  printf("Set the highest bit for bit selection: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &dig_filter[2], 1, HAL_MAX_DELAY);
+  printf("Set middle bit for bit selection: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &dig_filter[1], 1, HAL_MAX_DELAY);
+  printf("Set the lowest bit for bit selection: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &dig_filter[0], 1, HAL_MAX_DELAY);
+
+  dig_filter[2] = dig_filter[2] - 0x30;
+  dig_filter[1] = dig_filter[1] - 0x30;
+  dig_filter[0] = dig_filter[0] - 0x30;
+
+  dig_filter_all = 0;
+  dig_filter_all = ((dig_filter[2] << 2) | dig_filter[1] << 1) | dig_filter[0];
+  hal_error = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF3, 1, &reg, 2, HAL_MAX_DELAY);
+  printf("Hal status = %x\n", hal_error);
+  reg16 = (reg[1] << 8) | reg[0];
+  reg16 = reg16 & 0b1111111111100011;
+  dig_filter_all = reg16 | (dig_filter_all << 2);
+  printf("Value which will be sent to the reg: %02x \n", dig_filter_all);
+  hal_error = HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF3, 1, &dig_filter_all, 2, HAL_MAX_DELAY);
+  printf("Hal status = %x\n", hal_error);
   printf("Set done.\n");
   return;
 }
@@ -693,6 +745,10 @@ int main(void)
       case 'g':
         printf("Gain settings.\n");
         SetGain();
+        break;
+      case 'f':
+        printf("DigFilter settings.\n");
+        SetDigFilter();
         break;
       case 'r':
         printf("Resolution settings.\n");
