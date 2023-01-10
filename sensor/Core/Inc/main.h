@@ -63,12 +63,13 @@ extern "C" {
 #define BURST_MEASURE_TEMPERATURE 0b00010001
 #define BURST_MEASURE_MT 0b00010000
 
+#define EXIT_MODE 0b10000000
 #define RESET_SENSOR 0b11110000
 
 /* Exported types ------------------------------------------------------------*/
 
 /* Exported constants --------------------------------------------------------*/
-
+#define TWO_BITS 0b00000011
 /* Exported functions  -------------------------------------------------------*/
 void Error_Handler(void);
 
