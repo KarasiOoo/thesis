@@ -435,12 +435,20 @@ void SetGain()
   printf("Set the lowest bit for bit selection: (0 or 1)\n");
   HAL_UART_Receive(&huart2, &gain_sel[0], 1, HAL_MAX_DELAY);
 
+
+  gain_sel_all = 0;
   gain_sel_all = (((gain_sel[3] << 3) | gain_sel[2] << 2) | gain_sel[1] << 1) | gain_sel[0];      //0b0000 xxxx
-  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF1, 1, &reg, 1, HAL_MAX_DELAY);
-  reg = reg & 0b00001111;
-  gain_sel_all = gain_sel_all << 4 | reg;
+  hal_error = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF1, 1, &reg, 2, HAL_MAX_DELAY);
+  reg16 = reg[1] << 8 | reg[0];
+  reg16 = reg16 & 0b1111111100001111;
+  gain_sel_all = reg16 | (gain_sel_all << 4);
   printf("Value which will be sent to the reg: %02x \n", gain_sel_all);
-  HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF1, 1, &gain_sel_all, 1, HAL_MAX_DELAY);
+  printf("Hal status = %x\n", hal_error);
+  hal_error = HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF1, 1, &gain_sel_all, 2, HAL_MAX_DELAY);
+  printf("Hal status = %x\n", hal_error);
+  printf("Set done.\n");
+  return;
+}
   printf("Set done.\n");
   return;
 }
