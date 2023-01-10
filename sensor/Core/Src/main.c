@@ -455,6 +455,67 @@ void SetGain()
   printf("Set done.\n");
   return;
 }
+void SetBurstDataRate()
+{
+  I2C_HandleTypeDef i2c_address;
+  uint8_t dev_address, sensor;
+
+  uint8_t burst_data_rate[5], reg[2];
+  uint8_t burst_data_rate_all, hal_error;
+  uint16_t reg16;
+
+  printf("Select which sensor you want to configure: 1 - mid, 2 - high.\n");
+  HAL_UART_Receive(&huart2, &sensor, 1, HAL_MAX_DELAY); 
+
+  if(sensor == '1')
+  {
+    i2c_address = hi2c1;
+    dev_address = MEDIUM_SENSOR;
+    printf("Medium sensor: \n");
+  }
+  else if (sensor == '2')
+  {
+    i2c_address = hi2c2;
+    dev_address = HIGH_SENSOR;
+    printf("High sensor: \n");
+  }
+  else
+  {
+    printf("Wrong number given!\n");
+    return;
+  }
+
+  printf("Set first (the highest bit) for BurstDataRate: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &burst_data_rate[4], 1, HAL_MAX_DELAY);
+  printf("Set second for BurstDataRate: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &burst_data_rate[3], 1, HAL_MAX_DELAY);
+  printf("Set third for BurstDataRate: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &burst_data_rate[2], 1, HAL_MAX_DELAY);
+  printf("Set forth for BurstDataRate: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &burst_data_rate[1], 1, HAL_MAX_DELAY);
+  printf("Set fifth (the lowest) for BurstDataRate: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &burst_data_rate[0], 1, HAL_MAX_DELAY);
+
+  burst_data_rate[4] = burst_data_rate[4] - 0x30;
+  burst_data_rate[3] = burst_data_rate[3] - 0x30;
+  burst_data_rate[2] = burst_data_rate[2] - 0x30;
+  burst_data_rate[1] = burst_data_rate[1] - 0x30;
+  burst_data_rate[0] = burst_data_rate[0] - 0x30;
+
+  burst_data_rate_all = 0;
+  burst_data_rate_all = ((((burst_data_rate[4] << 4) | burst_data_rate[3] << 3) | burst_data_rate[2] << 2) 
+                        | burst_data_rate[1] << 1) | burst_data_rate[0];
+  hal_error = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF2, 1, &reg, 2, HAL_MAX_DELAY);
+  printf("Hal status = %x\n", hal_error);
+  reg16 = reg[1] << 8 | reg[0];
+  reg16 = reg16 & 0b0000000000011111;
+  burst_data_rate_all = reg16 | (burst_data_rate_all);
+  printf("Value which will be sent to the reg: %02x \n", burst_data_rate_all);
+  hal_error = HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF2, 1, &burst_data_rate_all, 2, HAL_MAX_DELAY);
+  printf("Hal status = %x\n", hal_error);
+  printf("Set done.\n");
+  return;
+}
   printf("Set done.\n");
   return;
 }
@@ -637,8 +698,9 @@ int main(void)
         printf("Resolution settings.\n");
         SetResolution();
         break;
-      case 'f':
+      case 'u':
         printf("Burst mode settings.\n");
+        SetBurstDataRate();
         break;
       case 'w':
         if(v_en == 0)
