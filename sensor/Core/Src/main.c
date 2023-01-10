@@ -662,6 +662,15 @@ void SetResolution()
   printf("Set done.\n");
   return;
 
+
+void SetSensitivity()
+{
+  I2C_HandleTypeDef i2c_address;
+  uint8_t dev_address, sensor, reg_xy[2], reg_z[2];
+  uint8_t  
+
+  uint16_t sensitivity_xy, sensitivity_z; 
+
 }
 
 int main(void)
