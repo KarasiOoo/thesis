@@ -666,11 +666,70 @@ void SetResolution()
 void SetSensitivity()
 {
   I2C_HandleTypeDef i2c_address;
-  uint8_t dev_address, sensor, reg_xy[2], reg_z[2];
-  uint8_t  
+  uint8_t dev_address, sensor, dimention;
 
-  uint16_t sensitivity_xy, sensitivity_z; 
+  uint8_t sensitivity_xy[10], sensitivity_z[10], reg[2];
+  uint16_t sensitivity_xy_all, sensitivity_z_all;
+  uint8_t i = 0; 
 
+  printf("Select which sensor you want to configure: 1 - mid, 2 - high.\n");
+  HAL_UART_Receive(&huart2, &sensor, 1, HAL_MAX_DELAY);
+
+  if(sensor == '1')
+  {
+    i2c_address = hi2c1;
+    dev_address = MEDIUM_SENSOR;
+    printf("Medium sensor: \n");
+  }
+  else if (sensor == '2')
+  {
+    i2c_address = hi2c2;
+    dev_address = HIGH_SENSOR;
+    printf("High sensor: \n");
+  }
+  else
+  {
+    printf("Wrong number given!\n");
+    return;
+  }
+
+  printf("Which sensitivity you want to set: 1 - XY, 2 - Z\n");
+  HAL_UART_Receive(&huart2, &dimention, 1, HAL_MAX_DELAY);
+  switch(dimention)
+  {
+    case '1':
+      for (i = 0; i <= 9; i++)
+      {
+        printf("Write %i bit of sensitivity XY:\n", i);
+        HAL_UART_Receive(&huart2, &sensitivity_xy[i], 1, HAL_MAX_DELAY);
+        sensitivity_xy[i] = sensitivity_xy[i] - 0x30;
+      }
+      sensitivity_xy_all = (((((((((sensitivity_xy[9] << 9) | sensitivity_xy[8] << 8) 
+                          | sensitivity_xy[7] << 7) | sensitivity_xy[6] << 6) | sensitivity_xy[5] << 5) 
+                          | sensitivity_xy[4] << 4) | sensitivity_xy[3] << 3) | sensitivity_xy[2] << 2) 
+                          | sensitivity_xy[1] << 1) | sensitivity_xy[0];
+      HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_SensXY, 1, reg, 2, HAL_MAX_DELAY);
+
+      HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF_SensXY, 1, &sensitivity_xy_all, 2, HAL_MAX_DELAY);
+      break;
+    case '2':
+      for (i = 0; i <= 9; i++)
+      {
+        printf("Write %i bit of sensitivity Z:\n", i);
+        HAL_UART_Receive(&huart2, &sensitivity_z[i], 1, HAL_MAX_DELAY);
+        sensitivity_z[i] = sensitivity_z[i] - 0x30;
+      }
+      sensitivity_z_all = ((((((((((sensitivity_z[9] << 9) | sensitivity_z[8] << 8) 
+                          | sensitivity_z[7] << 7) | sensitivity_z[6] << 6) | sensitivity_z[5] << 5) 
+                          | sensitivity_z[4] << 4) | sensitivity_z[3] << 3) | sensitivity_z[2] << 2) 
+                          | sensitivity_z[1] << 1) | sensitivity_z[0]);
+      HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF_SensZ, 1, &sensitivity_z_all, 2, HAL_MAX_DELAY);
+      break;
+    default:
+      printf("Unknown command.\n");
+      break;
+  }
+  return;
 }
 
 int main(void)
@@ -786,10 +845,8 @@ int main(void)
         ReadConfig();
         break;
       case 's':
-        //uint8_t sensitivity_xy[2];
         printf("Sensitivity settings.\n");
-        //HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_SensXY, 1, sensitivity_xy, 2, HAL_MAX_DELAY);
-        //printf("Odczytane: %x\n", sensitivity_xy);
+        SetSensitivity();
         break;
       case 'g':
         printf("Gain settings.\n");
