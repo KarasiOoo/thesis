@@ -15,19 +15,20 @@ extern "C" {
 
 /* Private defines for MLX90395  -----------------------------------------------------------*/
 #define REG_CONF1 0x00
-#define REG_CONF2 0x01
-#define REG_CONF3 0x02
-#define REG_CONF4 0x03
-#define REG_CONF_SensTCH 0x04
-#define REG_CONF_SensTCL 0x05
-#define REG_CONF_OffsetX 0x06
-#define REG_CONF_OffsetY 0x07
-#define REG_CONF_OffsetZ 0x08
-#define REG_CONF_OffsetDriftX 0x09
-#define REG_CONF_OffsetDriftY 0x0A
-#define REG_CONF_OffsetDriftZ 0x0B
-#define REG_CONF_SensXY 0x0C
-#define REG_CONF_SensZ 0x0D
+#define REG_CONF2 0x02
+#define REG_CONF3 0x04
+#define REG_CONF4 0x06
+#define REG_CONF_SensTCH 0x08
+#define REG_CONF_SensTCL 0x0A
+#define REG_CONF_OffsetX 0x0C
+#define REG_CONF_OffsetY 0x0E
+
+#define REG_CONF_OffsetZ 0x10
+#define REG_CONF_OffsetDriftX 0x12
+#define REG_CONF_OffsetDriftY 0x14
+#define REG_CONF_OffsetDriftZ 0x16
+#define REG_CONF_SensXY 0x18
+#define REG_CONF_SensZ 0x1A
 #define REG_CONF_WocXYThreshold 0x0E
 #define REG_CONF_WocZThreshold 0x0F
 #define REG_CONF_WocTTThreshold 0x10
@@ -66,10 +67,13 @@ extern "C" {
 #define EXIT_MODE 0b10000000
 #define RESET_SENSOR 0b11110000
 
+#define TWO_BITS 0b00000011
+
 /* Exported types ------------------------------------------------------------*/
 
 /* Exported constants --------------------------------------------------------*/
-#define TWO_BITS 0b00000011
+static uint16_t gain_multiplier[16] = {200, 250, 330, 400, 500, 600, 750, 1000,
+					 100, 125, 167, 200, 250, 300, 375, 500};
 /* Exported functions  -------------------------------------------------------*/
 void Error_Handler(void);
 
