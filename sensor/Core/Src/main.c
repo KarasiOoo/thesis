@@ -77,8 +77,8 @@ void ReadMagnetic()
   uint8_t dev_address, sensor;
   
   uint8_t memory[12];
-  int16_t measured_value_x, measured_value_y, measured_value_z;
-  int16_t measured_decimal_value_x, measured_decimal_value_y, measured_decimal_value_z;
+  int16_t measured_value_x, measured_value_y, measured_value_z, sensitivity;
+  //int16_t measured_decimal_value_x, measured_decimal_value_y, measured_decimal_value_z;
   int32_t measured_value_xf, measured_value_yf, measured_value_zf;
   int16_t calibration_x, calibration_y, calibration_z;
 
@@ -92,6 +92,7 @@ void ReadMagnetic()
     calibration_x = xm_cal;
     calibration_y = ym_cal;
     calibration_z = zm_cal;
+    sensitivity = 400;
     printf("Medium range sensor: \n");
   }
   else if (sensor == '2')
@@ -101,6 +102,7 @@ void ReadMagnetic()
     calibration_x = xh_cal;
     calibration_y = yh_cal;
     calibration_z = zh_cal;
+    sensitivity = 140;
     printf("High range sensor: \n");
   }
   else
@@ -115,20 +117,14 @@ void ReadMagnetic()
   measured_value_y = memory[4] << 8 | memory[5];
   measured_value_z = memory[6] << 8 | memory[7];
 
-  measured_decimal_value_x = BinaryToDecimal(measured_value_x);
-  measured_decimal_value_y = BinaryToDecimal(measured_value_y);
-  measured_decimal_value_z = BinaryToDecimal(measured_value_z);
+  measured_value_xf = measured_value_x * 1000 / sensitivity;
+  measured_value_yf = measured_value_y * 1000 / sensitivity;
+  measured_value_zf = measured_value_z * 1000 / sensitivity;
 
-  measured_value_xf = measured_value_x * 1000 / 400;
-  measured_value_yf = measured_value_y * 1000 / 400;
-  measured_value_zf = measured_value_z * 1000 / 400;
-
-  measured_value_xf = measured_value_xf - calibration_x;
-  measured_value_yf = measured_value_yf - calibration_y;
-  measured_value_zf = measured_value_zf - calibration_z;
-
-  printf("X: %05i,\t Y: %05i,\t Z: %05i (raw-binary)\n", measured_value_x, measured_value_y, measured_value_z);
-  printf("X: %05i,\t Y: %05i,\t Z: %05i (decimal)\n", measured_decimal_value_x, measured_decimal_value_y, measured_decimal_value_z);
+  //measured_value_xf = measured_value_xf - calibration_x;
+  //measured_value_yf = measured_value_yf - calibration_y;
+  //measured_value_zf = measured_value_zf - calibration_z;
+  
   printf("X: %05ld,\t Y: %05ld,\t Z: %05ld (uT)\n", measured_value_xf, measured_value_yf, measured_value_zf);
   return;
 }
