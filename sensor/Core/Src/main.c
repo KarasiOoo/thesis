@@ -219,7 +219,6 @@ void ReadVoltage(uint8_t sensor)
   I2C_HandleTypeDef i2c_address;
   uint8_t dev_address, v_val;
   uint8_t command = SINGLE_MEASURE_VOLTAGE;
-  //int16_t* measured_voltage;
   uint8_t memory[12];
 
   if(sensor == 1)
@@ -482,7 +481,7 @@ void ReadConfig()
   HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_OffsetZ, 1, offset_z, 2, HAL_MAX_DELAY);
   hal_error_sens_xy = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_SensXY, 1, sensitivity_xy, 2, HAL_MAX_DELAY);
   printf("Status sensXY: %x\n", hal_error_sens_xy);
-  hal_error_sens_xy = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_SensZ, 1, sensitivity_z, 2, HAL_MAX_DELAY);
+  hal_error_sens_z = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_SensZ, 1, sensitivity_z, 2, HAL_MAX_DELAY);
   printf("Status sensZ: %x\n", hal_error_sens_z);
 
   read_gain_sel = read_gain_sel >> 4;
@@ -571,6 +570,7 @@ void SetGain()
   printf("Set done.\n");
   return;
 }
+
 void SetBurstDataRate()
 {
   I2C_HandleTypeDef i2c_address;
@@ -746,6 +746,7 @@ void SetResolution()
   HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF3, 1, &reg_w, 2, HAL_MAX_DELAY);
   printf("Set done.\n");
   return;
+}
 
 
 void SetSensitivity()
@@ -969,7 +970,6 @@ int main(void)
     HAL_UART_Receive(&huart2, &new_task, 1, HAL_MAX_DELAY);
     printf("\n\n\n");
   }
-
 }
 /**
   * @brief System Clock Configuration
