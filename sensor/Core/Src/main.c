@@ -474,7 +474,7 @@ void ReadConfig()
 
   HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF1, 1, &read_gain_sel, 1, HAL_MAX_DELAY);
   HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF2, 1, &burst_data_rate, 1, HAL_MAX_DELAY);
-  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF3, 1, &digital_filter, 2, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF3, 1, digital_filter, 2, HAL_MAX_DELAY);
   HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF3, 1, resolution, 2, HAL_MAX_DELAY);
   HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_OffsetX, 1, offset_x, 2, HAL_MAX_DELAY);
   HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_OffsetY, 1, offset_y, 2, HAL_MAX_DELAY);
@@ -559,7 +559,7 @@ void SetGain()
 
   gain_sel_all = 0;
   gain_sel_all = (((gain_sel[3] << 3) | gain_sel[2] << 2) | gain_sel[1] << 1) | gain_sel[0];      //0b0000 xxxx
-  hal_error = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF1, 1, &reg, 2, HAL_MAX_DELAY);
+  hal_error = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF1, 1, reg, 2, HAL_MAX_DELAY);
   reg16 = reg[1] << 8 | reg[0];
   reg16 = reg16 & 0b1111111100001111;
   gain_sel_all = reg16 | (gain_sel_all << 4);
@@ -621,7 +621,7 @@ void SetBurstDataRate()
   burst_data_rate_all = 0;
   burst_data_rate_all = ((((burst_data_rate[4] << 4) | burst_data_rate[3] << 3) | burst_data_rate[2] << 2) 
                         | burst_data_rate[1] << 1) | burst_data_rate[0];
-  hal_error = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF2, 1, &reg, 2, HAL_MAX_DELAY);
+  hal_error = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF2, 1, reg, 2, HAL_MAX_DELAY);
   printf("Hal status = %x\n", hal_error);
   reg16 = reg[1] << 8 | reg[0];
   reg16 = reg16 & 0b0000000000011111;
@@ -676,7 +676,7 @@ void SetDigFilter()
 
   dig_filter_all = 0;
   dig_filter_all = ((dig_filter[2] << 2) | dig_filter[1] << 1) | dig_filter[0];
-  hal_error = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF3, 1, &reg, 2, HAL_MAX_DELAY);
+  hal_error = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF3, 1, reg, 2, HAL_MAX_DELAY);
   printf("Hal status = %x\n", hal_error);
   reg16 = (reg[1] << 8) | reg[0];
   reg16 = reg16 & 0b1111111111100011;
