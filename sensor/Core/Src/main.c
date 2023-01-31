@@ -124,7 +124,7 @@ void ReadMagnetic()
   //measured_value_xf = measured_value_xf - calibration_x;
   //measured_value_yf = measured_value_yf - calibration_y;
   //measured_value_zf = measured_value_zf - calibration_z;
-  
+
   printf("X: %05ld,\t Y: %05ld,\t Z: %05ld (uT)\n", measured_value_xf, measured_value_yf, measured_value_zf);
   return;
 }
@@ -207,7 +207,7 @@ void ReadMagneticTemperature()
   measured_value_y = memory[4] << 8 | memory[5];
   measured_value_z = memory[6] << 8 | memory[7];
   t_val = ((memory[8] << 8) | memory[9]);
-  t_val = t_val / 50;
+  t_val = (t_val / 50) - 4;
 
   printf("Status: %02x,\t X:%05i,\t Y:%05i,\t Z:%05i,\t T:%3.2f,\n", status, measured_value_x, measured_value_y, measured_value_z, t_val);
   return;
@@ -244,7 +244,7 @@ void ReadVoltage(uint8_t sensor)
   //HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_I2C_ComandStatus, 1, measured_voltage, 2, HAL_MAX_DELAY);
   HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_I2C_ComandStatus, 1, memory, 2, HAL_MAX_DELAY);
   v_val = memory[10] << 8 | memory[11];
-  printf("%02i\n", v_val);
+  printf("%01i.%01i\n", v_val/10, v_val%10);
   return;
 }
 
@@ -292,7 +292,12 @@ void ReadMagneticBurst()
     if (data_ready_m == 1)
     {
       hal_error = HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, REG_I2C_ComandStatus, 1, memory_m, 12, HAL_MAX_DELAY);
-      printf("Med status: %x\n", hal_error);
+      //printf("Med status: %x\n", hal_error);
+      if(hal_error != 0x00)
+      {
+        printf("Error occur during performing measurement on Medium range sensor!\n");
+        state = 0;
+      }
       measured_value_xm = memory_m[2] << 8 | memory_m[3];
       measured_value_ym = memory_m[4] << 8 | memory_m[5];
       measured_value_zm = memory_m[6] << 8 | memory_m[7];
@@ -305,13 +310,22 @@ void ReadMagneticBurst()
       f_value_ym = converted_value_ym % 1000;
       i_value_zm = converted_value_zm / 1000;
       f_value_zm = converted_value_zm % 1000;
-      print_m_ready = 1;
+      if(hal_error == 0x00)
+      {
+        print_m_ready = 1;
+      }
+      
     }
 
     if (data_ready_h == 1)
     {
       hal_error = HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, REG_I2C_ComandStatus, 1, memory_h, 12, HAL_MAX_DELAY);
-      printf("High status: %x\n", hal_error);
+      //printf("High status: %x\n", hal_error);
+      if(hal_error != 0x00)
+      {
+        printf("Error occur during performing measurement on High range sensor!\n");
+        state = 0;
+      }
       measured_value_xh = memory_h[2] << 8 | memory_h[3];
       measured_value_yh = memory_h[4] << 8 | memory_h[5];
       measured_value_zh = memory_h[6] << 8 | memory_h[7];
@@ -324,7 +338,10 @@ void ReadMagneticBurst()
       f_value_yh = converted_value_yh % 1000;
       i_value_zh = converted_value_zh / 1000;
       f_value_zh = converted_value_zh % 1000;
-      print_h_ready = 1;
+      if(hal_error == 0x00)
+      {
+        print_h_ready = 1;
+      }
     }
 
     if(print_m_ready == 1 && print_h_ready == 1)
@@ -384,7 +401,7 @@ void ReadMagneticBurst()
           printf("-");
         }
       }
-      printf("%02i,%03i,\t ", i_value_zm, p_value_zm);
+      printf("%02i.%03i,\t ", i_value_zm, p_value_zm);
 
 
       if (f_value_zh < 0)
@@ -395,7 +412,7 @@ void ReadMagneticBurst()
           printf("-");
         }
       }
-      printf("%02i.%03i\n\n", i_value_zh, p_value_zh);
+      printf("%02i.%03i\n\n\n", i_value_zh, p_value_zh);
     }
 
     HAL_UART_Receive(&huart2, &exit_meas, 1, 0); 
@@ -505,9 +522,9 @@ void ReadConfig()
   printf("Resolution X: %02x\n", resolution_x);
   printf("Resolution Y: %02x\n", resolution_y);
   printf("Resolution Z: %02x\n", resolution_z);
-  printf("Offset X:\t %04x\n", offset_x16);
-  printf("Offset Y:\t %04x\n", offset_y16);
-  printf("Offset Z:\t %04x\n", offset_z16);
+  //printf("Offset X:\t %04x\n", offset_x16);
+  //printf("Offset Y:\t %04x\n", offset_y16);
+  //printf("Offset Z:\t %04x\n", offset_z16);
   printf("Sensitivity XY: %04x\n", sensitivity_xy16);
   printf("Sensitivity Z: %04x\n", sensitivity_z16);
 
@@ -544,7 +561,9 @@ void SetGain()
   }
 
   printf("Set the highest bit for bit selection: (0 or 1)\n");
+  printf("'0' stands for 'x1' multiplier, '1' gives 'x0.5' for Gain A1\n");
   HAL_UART_Receive(&huart2, &gain_sel[3], 1, HAL_MAX_DELAY);
+  printf("Gain A2 is set by 3 following bits: \n\t'0' = x0.2\t '1' = x0.25\t '2' = x0.33\t '3' = x0.4\n\t'4' = x0.5\t '5' = x0.6\t '6' = x0.75\t '7' = x1\n");
   printf("Set second highest bit for bit selection: (0 or 1)\n");
   HAL_UART_Receive(&huart2, &gain_sel[2], 1, HAL_MAX_DELAY);
   printf("Set third highest bit for bit selection: (0 or 1)\n");
@@ -576,7 +595,7 @@ void SetBurstDataRate()
   I2C_HandleTypeDef i2c_address;
   uint8_t dev_address, sensor;
 
-  uint8_t burst_data_rate[5], reg[2];
+  uint8_t burst_data_rate[6], reg[2];
   uint8_t burst_data_rate_all, hal_error;
   uint16_t reg16;
 
@@ -601,17 +620,20 @@ void SetBurstDataRate()
     return;
   }
 
-  printf("Set first (the highest bit) for BurstDataRate: (0 or 1)\n");
-  HAL_UART_Receive(&huart2, &burst_data_rate[4], 1, HAL_MAX_DELAY);
-  printf("Set second for BurstDataRate: (0 or 1)\n");
-  HAL_UART_Receive(&huart2, &burst_data_rate[3], 1, HAL_MAX_DELAY);
-  printf("Set third for BurstDataRate: (0 or 1)\n");
-  HAL_UART_Receive(&huart2, &burst_data_rate[2], 1, HAL_MAX_DELAY);
+  printf("Set fifth (the highest bit) for BurstDataRate: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &burst_data_rate[5], 1, HAL_MAX_DELAY);
   printf("Set forth for BurstDataRate: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &burst_data_rate[4], 1, HAL_MAX_DELAY);
+  printf("Set third for BurstDataRate: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &burst_data_rate[3], 1, HAL_MAX_DELAY);
+  printf("Set second for BurstDataRate: (0 or 1)\n");
+  HAL_UART_Receive(&huart2, &burst_data_rate[2], 1, HAL_MAX_DELAY);
+  printf("Set first for BurstDataRate: (0 or 1)\n");
   HAL_UART_Receive(&huart2, &burst_data_rate[1], 1, HAL_MAX_DELAY);
-  printf("Set fifth (the lowest) for BurstDataRate: (0 or 1)\n");
+  printf("Set zeroth (the lowest) for BurstDataRate: (0 or 1)\n");
   HAL_UART_Receive(&huart2, &burst_data_rate[0], 1, HAL_MAX_DELAY);
 
+  burst_data_rate[5] = burst_data_rate[5] - 0x30;
   burst_data_rate[4] = burst_data_rate[4] - 0x30;
   burst_data_rate[3] = burst_data_rate[3] - 0x30;
   burst_data_rate[2] = burst_data_rate[2] - 0x30;
@@ -619,15 +641,15 @@ void SetBurstDataRate()
   burst_data_rate[0] = burst_data_rate[0] - 0x30;
 
   burst_data_rate_all = 0;
-  burst_data_rate_all = ((((burst_data_rate[4] << 4) | burst_data_rate[3] << 3) | burst_data_rate[2] << 2) 
+  burst_data_rate_all = (((((burst_data_rate[5] << 5) | burst_data_rate[4] << 4) | burst_data_rate[3] << 3) | burst_data_rate[2] << 2) 
                         | burst_data_rate[1] << 1) | burst_data_rate[0];
   hal_error = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF2, 1, reg, 2, HAL_MAX_DELAY);
   printf("Hal status = %x\n", hal_error);
   reg16 = reg[1] << 8 | reg[0];
-  reg16 = reg16 & 0b0000000000011111;
-  burst_data_rate_all = reg16 | (burst_data_rate_all);
-  printf("Value which will be sent to the reg: %02x \n", burst_data_rate_all);
-  hal_error = HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF2, 1, &burst_data_rate_all, 2, HAL_MAX_DELAY);
+  reg16 = reg16 & 0xFFC0;
+  reg16 = reg16 | burst_data_rate_all;
+  printf("Value which will be sent to the reg: %02x \n", reg16);
+  hal_error = HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF2, 1, &reg16, 2, HAL_MAX_DELAY);
   printf("Hal status = %x\n", hal_error);
   printf("Set done.\n");
   return;
@@ -852,8 +874,8 @@ int main(void)
     printf("\t c - Show status reg.\n");
     printf("\t k - Calibrate magnetic sensor.\n");
     printf("\t a - Show all config parameters.\n");
-    printf("\t s - Set sensitivity(NY).\n");
-    printf("\t o - Set offset(NY).\n");
+    printf("\t s - Set sensitivity.\n");
+    //printf("\t o - Set offset(NY).\n");
     printf("\t g - Set gain.\n");
     printf("\t f - Set Digital Filter, average from x measurement,\n");
     printf("\t r - Set resolution for magnetic measurements.\n");
