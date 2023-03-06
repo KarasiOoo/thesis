@@ -427,6 +427,243 @@ void ReadMagneticBurst()
   return;
 }
 
+void ReadMagneticBurstAveraged(uint8_t samples)
+{
+  uint8_t entry_meas, exit_meas, state, measure, print_m_ready, print_h_ready, hal_error;
+  uint8_t gain_m, gain_h, temp_mem_m[6], temp_mem_h[6], data_ready_m, data_ready_h, hal_error_m, hal_error_h;
+  i2c_measurement_memory memory_m[samples], memory_h[samples];
+  int16_t value_xm[samples], value_ym[samples], value_zm[samples], value_xh[samples], value_yh[samples], value_zh[samples];
+  int64_t sum_value_xm, sum_value_ym, sum_value_zm, avg_value_xm, avg_value_ym, avg_value_zm;
+  int64_t sum_value_xh, sum_value_yh, sum_value_zh, avg_value_xh, avg_value_yh, avg_value_zh;
+  int32_t i_value_xm, f_value_xm, i_value_ym, f_value_ym, i_value_zm, f_value_zm;
+  int32_t i_value_xh, f_value_xh, i_value_yh, f_value_yh, i_value_zh, f_value_zh;
+  uint16_t p_value_xm, p_value_ym, p_value_zm, p_value_xh, p_value_yh, p_value_zh;
+
+  entry_meas = 0;
+  exit_meas = 0;
+  state = 1;
+
+  HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, REG_CONF1, 1, &gain_m, 1, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, REG_CONF1, 1, &gain_h, 1, HAL_MAX_DELAY);
+
+  gain_m = gain_m >> 4;
+  gain_h = gain_h >> 4;
+
+  WriteRegMid(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
+  WriteRegHigh(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
+  HAL_UART_Receive(&huart2, &entry_meas, 1, 10); 
+  
+  printf("   Mid:, \t High:\n");
+
+  while(state)
+  {
+    sum_value_xm = 0, sum_value_ym = 0, sum_value_zm = 0, avg_value_xm = 0, avg_value_ym = 0, avg_value_zm = 0;
+    sum_value_xh = 0, sum_value_yh = 0, sum_value_zh = 0, avg_value_xh = 0, avg_value_yh = 0, avg_value_zh = 0;
+
+    for(measure = 0; measure < samples; measure++) //musze wyzerowac memory_m przy wchodzeniu do pętlli
+    {
+      do
+      {
+        hal_error_m = HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, REG_I2C_ComandStatus, 1, &data_ready_m, 1, HAL_MAX_DELAY);
+        //printf("Med status: %x\n", hal_error);
+        hal_error_h = HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, REG_I2C_ComandStatus, 1, &data_ready_h, 1, HAL_MAX_DELAY);
+        //printf("High status: %x\n", hal_error);
+
+        data_ready_m = data_ready_m & 0x1;        
+        data_ready_h = data_ready_h & 0x1;
+        HAL_Delay(1);
+      } while (data_ready_m != 1 || data_ready_h != 1);
+      
+      if(data_ready_m == 1)
+      {
+        hal_error_m = HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, REG_I2CX2, 1, temp_mem_m, 6, HAL_MAX_DELAY);
+        if(hal_error_m != 0x00)
+        {
+          printf("Error occur during performing measurement on Medium range sensor!\n");
+          state = 0;
+          break;
+        }
+
+        memory_m[measure].x1 = *(reg_8 *)&temp_mem_m[0];
+        memory_m[measure].x0 = *(reg_8 *)&temp_mem_m[1];
+        memory_m[measure].y1 = *(reg_8 *)&temp_mem_m[2];
+        memory_m[measure].y0 = *(reg_8 *)&temp_mem_m[3];
+        memory_m[measure].z1 = *(reg_8 *)&temp_mem_m[4];
+        memory_m[measure].z0 = *(reg_8 *)&temp_mem_m[5];
+
+        value_xm[measure] = memory_m[measure].x1 << 8 | memory_m[measure].x0;
+        value_ym[measure] = memory_m[measure].y1 << 8 | memory_m[measure].y0;
+        value_zm[measure] = memory_m[measure].z1 << 8 | memory_m[measure].z0;
+   
+        value_xm[measure] = (((value_xm[measure] * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
+        value_ym[measure] = (((value_ym[measure] * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
+        value_zm[measure] = (((value_zm[measure] * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
+
+        sum_value_xm = sum_value_xm + value_xm[measure];
+        sum_value_ym = sum_value_ym + value_ym[measure];
+        sum_value_zm = sum_value_zm + value_zm[measure]; 
+      }
+      
+      if(data_ready_h == 1)
+      {
+        hal_error_h = HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, REG_I2CX2, 1, temp_mem_h, 6, HAL_MAX_DELAY);
+
+        if(hal_error_h != 0x00)
+        {
+          printf("Error occur during performing measurement on High range sensor!\n");
+          state = 0;
+          break;
+        }
+
+        memory_h[measure].x1 = *(reg_8 *)&temp_mem_h[0];
+        memory_h[measure].x0 = *(reg_8 *)&temp_mem_h[1];
+        memory_h[measure].y1 = *(reg_8 *)&temp_mem_h[2];
+        memory_h[measure].y0 = *(reg_8 *)&temp_mem_h[3];
+        memory_h[measure].z1 = *(reg_8 *)&temp_mem_h[4];
+        memory_h[measure].z0 = *(reg_8 *)&temp_mem_h[5];
+
+        value_xh[measure] = memory_h[measure].x1 << 8 | memory_h[measure].x0;
+        value_yh[measure] = memory_h[measure].y1 << 8 | memory_h[measure].y0;
+        value_zh[measure] = memory_h[measure].z1 << 8 | memory_h[measure].z0;
+
+        value_xh[measure] = (((value_xh[measure] * 1000) / 140) * gain_multiplier[gain_m]) / 1000;
+        value_yh[measure] = (((value_yh[measure] * 1000) / 140) * gain_multiplier[gain_m]) / 1000;
+        value_zh[measure] = (((value_zh[measure] * 1000) / 140) * gain_multiplier[gain_m]) / 1000;
+
+        sum_value_xh = sum_value_xh + value_xh[measure];
+        sum_value_yh = sum_value_yh + value_yh[measure];
+        sum_value_zh = sum_value_zh + value_zh[measure];
+      }  
+    }
+
+    HAL_UART_Receive(&huart2, &exit_meas, 1, 0); 
+    if(entry_meas != exit_meas)
+    {
+      state = 0;
+    }
+
+    // avg_value_xm = sum_value_xm / samples;
+    // avg_value_ym = sum_value_ym / samples;
+    // avg_value_zm = sum_value_zm / samples;
+
+    //avg_value_xm = (((avg_value_xm * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
+    //avg_value_ym = (((avg_value_ym * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
+    //avg_value_zm = (((avg_value_zm * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
+
+    // i_value_xm = avg_value_xm / 1000;
+    // f_value_xm = avg_value_xm % 1000;
+    // i_value_ym = avg_value_ym / 1000;
+    // f_value_ym = avg_value_xm % 1000;
+    // i_value_zm = avg_value_zm / 1000;
+    // f_value_zm = avg_value_zm % 1000;
+
+    i_value_xm = (sum_value_xm / samples) / 1000;
+    f_value_xm = (sum_value_xm / samples) % 1000;
+    i_value_ym = (sum_value_ym / samples) / 1000;
+    f_value_ym = (sum_value_ym / samples) % 1000;
+    i_value_zm = (sum_value_zm / samples) / 1000;
+    f_value_zm = (sum_value_zm / samples) % 1000;
+
+    if(hal_error_m == 0x00)
+    { 
+      print_m_ready = 1;
+    }
+
+    avg_value_xh = sum_value_xh / samples;
+    avg_value_yh = sum_value_yh / samples;
+    avg_value_zh = sum_value_zh / samples;
+
+    // avg_value_xh = (((avg_value_xh * 1000) / 140) * gain_multiplier[gain_h]) / 1000;
+    // avg_value_yh = (((avg_value_yh * 1000) / 140) * gain_multiplier[gain_h]) / 1000;
+    // avg_value_zh = (((avg_value_zh * 1000) / 140) * gain_multiplier[gain_h]) / 1000;
+
+    i_value_xh = avg_value_xh / 1000;
+    f_value_xh = avg_value_xh % 1000;
+    i_value_yh = avg_value_yh / 1000;
+    f_value_yh = avg_value_yh % 1000;
+    i_value_zh = avg_value_zh / 1000;
+    f_value_zh = avg_value_zh % 1000;
+
+    if(hal_error_h == 0x00)
+    {
+      print_h_ready = 1;
+    }
+
+    if(print_m_ready == 1 && print_h_ready == 1)
+    { 
+      printf("X: ");
+      if (f_value_xm < 0)
+      {
+        p_value_xm = ~f_value_xm + 1;
+
+      if (f_value_xm < 0)
+        {
+          printf("-");
+        }
+      }
+      printf("%02ld.%03i,\t ", i_value_xm, p_value_xm);
+
+      if (f_value_xh < 0)
+      {
+        p_value_xh = ~f_value_xh + 1;
+        if (i_value_xh >= 0)
+        {
+          printf("-");
+        }
+      }
+      printf("%02ld.%03i\n", i_value_xh, p_value_xh);
+
+      printf("Y: ");
+      if (f_value_ym < 0)
+      {
+        p_value_ym = ~f_value_ym + 1;
+        if (i_value_ym >= 0)
+        {
+          printf("-");
+        }
+      }
+      printf("%02ld.%03i,\t ", (int32_t)i_value_ym, p_value_ym);
+
+      if (f_value_yh < 0)
+      {
+        p_value_yh = ~f_value_yh + 1;
+        if (i_value_yh >= 0)
+        {
+          printf("-");
+        }
+      }
+      printf("%02ld.%03i\n", (int32_t)i_value_yh, p_value_yh);
+
+      printf("Z: ");
+      if (f_value_zm < 0)
+      {
+        p_value_zm = ~f_value_zm + 1;
+        if (i_value_zm >= 0)
+        {
+          printf("-");
+        }
+      }
+      printf("%02ld.%03i,\t ", (int32_t)i_value_zm, p_value_zm);
+
+      if (f_value_zh < 0)
+      {
+        p_value_zh = ~f_value_zh + 1;
+        if (i_value_zh >= 0)
+        {
+          printf("-");
+        }
+      }
+      printf("%02l64d.%03i\n\n\n", (int32_t)i_value_zh, p_value_zh);
+    }
+    HAL_Delay(500);
+  }
+  printf("Measurement finished.\n");
+  WriteRegMid(REG_I2C_ComandStatus, EXIT_MODE);
+  WriteRegHigh(REG_I2C_ComandStatus, EXIT_MODE);
+  return;
+}
+
+
 void ReadStatus(uint8_t sensor)
 {
   I2C_HandleTypeDef i2c_address;
