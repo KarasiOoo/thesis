@@ -67,7 +67,23 @@ extern "C" {
 
 #define TWO_BITS 0b00000011
 
+//#define MLX_I2C_M ((i2c_memory *) 0x80)
+//#define MLX_I2C_H ((i2c_memory *) 0x80)
+
 /* Exported types ------------------------------------------------------------*/
+typedef volatile uint8_t reg_8;
+
+typedef struct _memory_i2c
+{
+  reg_8 x1;
+  reg_8 x0;
+  reg_8 y1;
+  reg_8 y0;
+  reg_8 z1;
+  reg_8 z0;
+} i2c_measurement_memory;
+
+
 
 /* Exported constants --------------------------------------------------------*/
 static uint16_t gain_multiplier[16] = {200, 250, 330, 400, 500, 600, 750, 1000,
