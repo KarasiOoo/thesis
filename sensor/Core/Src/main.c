@@ -1165,6 +1165,9 @@ int main(void)
       case 'b':
         printf("Continues measurement:\n");
         ReadMagneticBurst();
+      case 'n':
+        printf("Set amount of samples.\n");
+        samples = SetSamples();
         break;
       case 'z':
         printf("Reset in progress...\n");
