@@ -36,16 +36,16 @@ extern "C" {
 
 #define REG_I2C_ComandStatus 0x80
 #define REG_I2C_CRC8CCITT 0x81
-#define REG_I2CX1 0x83
 #define REG_I2CX2 0x82
-#define REG_I2CY1 0x85
+#define REG_I2CX1 0x83
 #define REG_I2CY2 0x84
-#define REG_I2CZ1 0x87
+#define REG_I2CY1 0x85
 #define REG_I2CZ2 0x86
-#define REG_I2CT1 0x89
+#define REG_I2CZ1 0x87
 #define REG_I2CT2 0x88
-#define REG_I2CV1 0x8B
+#define REG_I2CT1 0x89
 #define REG_I2CV2 0x8A
+#define REG_I2CV1 0x8B
 #define REG_I2C_ID1 0x26
 #define REG_I2C_ID2 0x27
 #define REG_I2C_ID3 0x28
