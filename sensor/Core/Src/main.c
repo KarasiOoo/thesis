@@ -663,6 +663,24 @@ void ReadMagneticBurstAveraged(uint8_t samples)
   return;
 }
 
+uint8_t SetSamples(void)
+{
+  uint8_t get_samples[3];
+  printf("Give hundert part to rounding:\n");
+  HAL_UART_Receive(&huart2, &get_samples[2], 1, HAL_MAX_DELAY);
+  printf("Give ten part to rounding:\n");
+  HAL_UART_Receive(&huart2, &get_samples[1], 1, HAL_MAX_DELAY);
+  printf("Give unit part to rounding:\n");
+  HAL_UART_Receive(&huart2, &get_samples[0], 1, HAL_MAX_DELAY);
+
+  get_samples[2] = get_samples[2] - 0x30;
+  get_samples[1] = get_samples[1] - 0x30;
+  get_samples[0] = get_samples[0] - 0x30;
+
+  samples = (get_samples[2] * 100) + (get_samples[1] * 10) + get_samples[0];
+  printf("Selected amount of samples: %i.\n", samples);
+  return samples;
+}
 
 void ReadStatus(uint8_t sensor)
 {
