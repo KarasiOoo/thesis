@@ -22,7 +22,6 @@ extern "C" {
 #define REG_CONF_SensTCL 0x0A
 #define REG_CONF_OffsetX 0x0C
 #define REG_CONF_OffsetY 0x0E
-
 #define REG_CONF_OffsetZ 0x10
 #define REG_CONF_OffsetDriftX 0x12
 #define REG_CONF_OffsetDriftY 0x14
@@ -46,14 +45,13 @@ extern "C" {
 #define REG_I2CT1 0x89
 #define REG_I2CV2 0x8A
 #define REG_I2CV1 0x8B
+
 #define REG_I2C_ID1 0x26
 #define REG_I2C_ID2 0x27
 #define REG_I2C_ID3 0x28
 
-
 #define MEDIUM_SENSOR 0b00011010
 #define HIGH_SENSOR 0b00011000
-
 
 #define SINGLE_MEASURE_MAGNETIC 0b00111110
 #define SINGLE_MEASURE_TEMPERATURE 0b00110001
