@@ -967,6 +967,7 @@ int main(void)
     printf("\t t - Once temperature.\n");
     printf("\t v - Once voltage.\n");
     printf("\t b - Continues magnetic field and temperature.\n");
+    printf("\t n - Set amount of samples to take average from it in Continues measurement.\n");
     printf("\t z - Reset.\n");
     printf("Calibration/settings:\n");
     printf("\t c - Show status reg.\n");
@@ -1012,11 +1013,11 @@ int main(void)
         samples = SetSamples();
         break;
       case 'z':
-        printf("Reset in progress...\n");
+        printf("Device reset in progress...\n");
         WriteRegMid(REG_I2C_ComandStatus, RESET_SENSOR);
         WriteRegHigh(REG_I2C_ComandStatus, RESET_SENSOR);
         HAL_Delay(300);
-        printf("Reset done\n");
+        printf("Device reset done\n");
         break;
       case 'c':
         ReadStatus(1);
