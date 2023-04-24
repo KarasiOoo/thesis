@@ -256,12 +256,13 @@ void ReadMagneticBurstAveraged(uint8_t samples)
   uint8_t entry_meas, exit_meas, state, measure, print_m_ready, print_h_ready, hal_error;
   uint8_t gain_m, gain_h, temp_mem_m[6], temp_mem_h[6], data_ready_m, data_ready_h, hal_error_m, hal_error_h;
   i2c_measurement_memory memory_m[samples], memory_h[samples];
-  int16_t value_xm[samples], value_ym[samples], value_zm[samples], value_xh[samples], value_yh[samples], value_zh[samples];
+  int16_t ext_xm, ext_ym, ext_zm, ext_xh, ext_yh, ext_zh;
+  int32_t value_xm[samples], value_ym[samples], value_zm[samples], value_xh[samples], value_yh[samples], value_zh[samples];
   int64_t sum_value_xm, sum_value_ym, sum_value_zm, avg_value_xm, avg_value_ym, avg_value_zm;
   int64_t sum_value_xh, sum_value_yh, sum_value_zh, avg_value_xh, avg_value_yh, avg_value_zh;
   int32_t i_value_xm, f_value_xm, i_value_ym, f_value_ym, i_value_zm, f_value_zm;
   int32_t i_value_xh, f_value_xh, i_value_yh, f_value_yh, i_value_zh, f_value_zh;
-  uint16_t p_value_xm, p_value_ym, p_value_zm, p_value_xh, p_value_yh, p_value_zh;
+  uint32_t p_value_xm, p_value_ym, p_value_zm, p_value_xh, p_value_yh, p_value_zh;
 
   entry_meas = 0;
   exit_meas = 0;
@@ -318,9 +319,13 @@ void ReadMagneticBurstAveraged(uint8_t samples)
         memory_m[measure].z1 = *(reg_8 *)&temp_mem_m[4];
         memory_m[measure].z0 = *(reg_8 *)&temp_mem_m[5];
 
-        value_xm[measure] = memory_m[measure].x1 << 8 | memory_m[measure].x0;
-        value_ym[measure] = memory_m[measure].y1 << 8 | memory_m[measure].y0;
-        value_zm[measure] = memory_m[measure].z1 << 8 | memory_m[measure].z0;
+        ext_xm = (int16_t)((int8_t)memory_m[measure].x1);
+        ext_ym = (int16_t)((int8_t)memory_m[measure].y1);
+        ext_zm = (int16_t)((int8_t)memory_m[measure].z1);
+
+        value_xm[measure] = (int32_t)ext_xm << 8 | memory_m[measure].x0;
+        value_ym[measure] = (int32_t)ext_ym << 8 | memory_m[measure].y0;
+        value_zm[measure] = (int32_t)ext_zm << 8 | memory_m[measure].z0;
    
         value_xm[measure] = (((value_xm[measure] * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
         value_ym[measure] = (((value_ym[measure] * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
@@ -349,9 +354,13 @@ void ReadMagneticBurstAveraged(uint8_t samples)
         memory_h[measure].z1 = *(reg_8 *)&temp_mem_h[4];
         memory_h[measure].z0 = *(reg_8 *)&temp_mem_h[5];
 
-        value_xh[measure] = memory_h[measure].x1 << 8 | memory_h[measure].x0;
-        value_yh[measure] = memory_h[measure].y1 << 8 | memory_h[measure].y0;
-        value_zh[measure] = memory_h[measure].z1 << 8 | memory_h[measure].z0;
+        ext_xh = (int16_t)((int8_t)memory_h[measure].x1);
+        ext_yh = (int16_t)((int8_t)memory_h[measure].y1);
+        ext_zh = (int16_t)((int8_t)memory_h[measure].z1);
+
+        value_xh[measure] = (int32_t)ext_xh << 8 | memory_h[measure].x0;
+        value_yh[measure] = (int32_t)ext_yh << 8 | memory_h[measure].y0;
+        value_zh[measure] = (int32_t)ext_zh << 8 | memory_h[measure].z0;
 
         value_xh[measure] = (((value_xh[measure] * 1000) / 140) * gain_multiplier[gain_m]) / 1000;
         value_yh[measure] = (((value_yh[measure] * 1000) / 140) * gain_multiplier[gain_m]) / 1000;
@@ -369,40 +378,28 @@ void ReadMagneticBurstAveraged(uint8_t samples)
       state = 0;
     }
 
-    // avg_value_xm = sum_value_xm / samples;
-    // avg_value_ym = sum_value_ym / samples;
-    // avg_value_zm = sum_value_zm / samples;
+    avg_value_xm = sum_value_xm / samples;
+    avg_value_ym = sum_value_ym / samples;
+    avg_value_zm = sum_value_zm / samples;
 
-    //avg_value_xm = (((avg_value_xm * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
-    //avg_value_ym = (((avg_value_ym * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
-    //avg_value_zm = (((avg_value_zm * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
+    // avg_value_xm = avg_value_xm - offset_xm;
+    // avg_value_ym = avg_value_ym - offset_ym;
+    // avg_value_zm = avg_value_zm - offset_zm;
+    // avg_value_xh = avg_value_xh - offset_xh;
+    // avg_value_xh = avg_value_xh - offset_xh;
+    // avg_value_xh = avg_value_xh - offset_xh;
 
-    // i_value_xm = avg_value_xm / 1000;
-    // f_value_xm = avg_value_xm % 1000;
-    // i_value_ym = avg_value_ym / 1000;
-    // f_value_ym = avg_value_xm % 1000;
-    // i_value_zm = avg_value_zm / 1000;
-    // f_value_zm = avg_value_zm % 1000;
+    i_value_xm = avg_value_xm / 1000;
+    f_value_xm = avg_value_xm % 1000;
+    i_value_ym = avg_value_ym / 1000;
+    f_value_ym = avg_value_ym % 1000;
+    i_value_zm = avg_value_zm / 1000;
+    f_value_zm = avg_value_zm % 1000;
 
-    i_value_xm = (sum_value_xm / samples) / 1000;
-    f_value_xm = (sum_value_xm / samples) % 1000;
-    i_value_ym = (sum_value_ym / samples) / 1000;
-    f_value_ym = (sum_value_ym / samples) % 1000;
-    i_value_zm = (sum_value_zm / samples) / 1000;
-    f_value_zm = (sum_value_zm / samples) % 1000;
-
-    if(hal_error_m == 0x00)
-    { 
-      print_m_ready = 1;
-    }
 
     avg_value_xh = sum_value_xh / samples;
     avg_value_yh = sum_value_yh / samples;
     avg_value_zh = sum_value_zh / samples;
-
-    // avg_value_xh = (((avg_value_xh * 1000) / 140) * gain_multiplier[gain_h]) / 1000;
-    // avg_value_yh = (((avg_value_yh * 1000) / 140) * gain_multiplier[gain_h]) / 1000;
-    // avg_value_zh = (((avg_value_zh * 1000) / 140) * gain_multiplier[gain_h]) / 1000;
 
     i_value_xh = avg_value_xh / 1000;
     f_value_xh = avg_value_xh % 1000;
@@ -411,7 +408,6 @@ void ReadMagneticBurstAveraged(uint8_t samples)
     i_value_zh = avg_value_zh / 1000;
     f_value_zh = avg_value_zh % 1000;
 
-    if(hal_error_h == 0x00)
     {
       print_h_ready = 1;
     }
