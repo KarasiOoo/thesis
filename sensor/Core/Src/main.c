@@ -284,8 +284,11 @@ void ReadMagneticBurstAveraged(uint8_t samples)
     sum_value_xm = 0, sum_value_ym = 0, sum_value_zm = 0, avg_value_xm = 0, avg_value_ym = 0, avg_value_zm = 0;
     sum_value_xh = 0, sum_value_yh = 0, sum_value_zh = 0, avg_value_xh = 0, avg_value_yh = 0, avg_value_zh = 0;
 
-    for(measure = 0; measure < samples; measure++) //musze wyzerowac memory_m przy wchodzeniu do pętlli
+    for(measure = 0; measure < samples; measure++)
     {
+      memset(&memory_m, 0, sizeof(memory_m));
+      memset(&memory_h, 0, sizeof(memory_h));
+
       do
       {
         hal_error_m = HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, REG_I2C_ComandStatus, 1, &data_ready_m, 1, HAL_MAX_DELAY);
