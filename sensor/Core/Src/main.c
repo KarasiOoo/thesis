@@ -408,77 +408,92 @@ void ReadMagneticBurstAveraged(uint8_t samples)
     i_value_zh = avg_value_zh / 1000;
     f_value_zh = avg_value_zh % 1000;
 
+    printf("X: ");
+    if (f_value_xm < 0)
     {
-      print_h_ready = 1;
+      p_value_xm = ~f_value_xm + 1;
+      if (i_value_xm >= 0)
+      {
+        printf("-");
+      }
     }
-
-    if(print_m_ready == 1 && print_h_ready == 1)
-    { 
-      printf("X: ");
-      if (f_value_xm < 0)
-      {
-        p_value_xm = ~f_value_xm + 1;
-
-      if (f_value_xm < 0)
-        {
-          printf("-");
-        }
-      }
-      printf("%02ld.%03i,\t ", i_value_xm, p_value_xm);
-
-      if (f_value_xh < 0)
-      {
-        p_value_xh = ~f_value_xh + 1;
-        if (i_value_xh >= 0)
-        {
-          printf("-");
-        }
-      }
-      printf("%02ld.%03i\n", i_value_xh, p_value_xh);
-
-      printf("Y: ");
-      if (f_value_ym < 0)
-      {
-        p_value_ym = ~f_value_ym + 1;
-        if (i_value_ym >= 0)
-        {
-          printf("-");
-        }
-      }
-      printf("%02ld.%03i,\t ", (int32_t)i_value_ym, p_value_ym);
-
-      if (f_value_yh < 0)
-      {
-        p_value_yh = ~f_value_yh + 1;
-        if (i_value_yh >= 0)
-        {
-          printf("-");
-        }
-      }
-      printf("%02ld.%03i\n", (int32_t)i_value_yh, p_value_yh);
-
-      printf("Z: ");
-      if (f_value_zm < 0)
-      {
-        p_value_zm = ~f_value_zm + 1;
-        if (i_value_zm >= 0)
-        {
-          printf("-");
-        }
-      }
-      printf("%02ld.%03i,\t ", (int32_t)i_value_zm, p_value_zm);
-
-      if (f_value_zh < 0)
-      {
-        p_value_zh = ~f_value_zh + 1;
-        if (i_value_zh >= 0)
-        {
-          printf("-");
-        }
-      }
-      printf("%02l64d.%03i\n\n\n", (int32_t)i_value_zh, p_value_zh);
+    else
+    {
+      p_value_xm = f_value_xm;
     }
-    HAL_Delay(500);
+    printf("%02ld.%03i,\t ", i_value_xm, p_value_xm);
+
+    if (f_value_xh < 0)
+    {
+      p_value_xh = ~f_value_xh + 1;
+      if (i_value_xh >= 0)
+      {
+        printf("-");
+      }
+    }
+    else
+    {
+      p_value_xh = f_value_xh;
+    }
+    printf("%02ld.%03i\n", i_value_xh, p_value_xh);
+
+    printf("Y: ");
+    if (f_value_ym < 0)
+    {
+      p_value_ym = ~f_value_ym + 1;
+      if (i_value_ym >= 0)
+      {
+        printf("-");
+      }
+    }
+    else
+    {
+      p_value_ym = f_value_ym;
+    }
+    printf("%02ld.%03i,\t ", (int32_t)i_value_ym, p_value_ym);
+
+    if (f_value_yh < 0)
+    {
+      p_value_yh = ~f_value_yh + 1;
+      if (i_value_yh >= 0)
+      {
+        printf("-");
+      }
+    }
+    else
+    {
+      p_value_yh = f_value_yh;
+    }
+    printf("%02ld.%03i\n", (int32_t)i_value_yh, p_value_yh);
+
+    printf("Z: ");
+    if (f_value_zm < 0)
+    {
+      p_value_zm = ~f_value_zm + 1;
+      if (i_value_zm >= 0)
+      {
+        printf("-");
+      }
+    }
+    else
+    {
+      p_value_zm = f_value_zm;
+    }
+    printf("%02ld.%03i,\t ", (int32_t)i_value_zm, p_value_zm);
+
+    if (f_value_zh < 0)
+    {
+      p_value_zh = ~f_value_zh + 1;
+      if (i_value_zh >= 0)
+      {
+        printf("-");
+      }
+    }
+    else
+    {
+      p_value_zh = f_value_zh;
+    }
+    printf("%02ld.%03i\n\n\n", (int32_t)i_value_zh, p_value_zh);
   }
   printf("Measurement finished.\n");
   WriteRegMid(REG_I2C_ComandStatus, EXIT_MODE);
