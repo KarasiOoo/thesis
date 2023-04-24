@@ -1,6 +1,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include <stdio.h>
+#include <string.h>
+#include <stdint.h>
 
 /* Private typedef -----------------------------------------------------------*/
 
