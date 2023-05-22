@@ -21,6 +21,8 @@ static void MX_I2C2_Init(void);
 static void MX_USART2_UART_Init(void);
 
 int16_t xm_cal, ym_cal, zm_cal, xh_cal, yh_cal, zh_cal;
+int64_t offset_xm, offset_ym, offset_zm, offset_xh, offset_yh, offset_zh;
+uint16_t samples = 100; 
 
 int __io_putchar(int ch)
 {
