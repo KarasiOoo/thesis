@@ -596,7 +596,8 @@ void ReadConfig()
   hal_error_sens_z = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_SensZ, 1, sensitivity_z, 2, HAL_MAX_DELAY);
   printf("Status sensZ: %x\n", hal_error_sens_z);
 
-  read_gain_sel = read_gain_sel >> 4;
+  read_gain_all = (read_gain[0] << 8) | read_gain[1];
+  read_gain_all = read_gain_all >> 4;
   burst_data_rate = burst_data_rate & 0b00111111;
   digital_filter_dislpayed = (digital_filter[0] & 0b00011100) >> 2;
   resolution_x = (resolution[0] >> 5) & TWO_BITS;
