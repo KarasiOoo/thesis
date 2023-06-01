@@ -684,7 +684,8 @@ void SetGain()
   printf("Register prepared to inject new value: 0x%04x\n", reg16);
 
   gain_sel_all = reg16 | (gain_sel_all << 4);
-  printf("Value which will be sent to the reg: %02x \n", gain_sel_all);
+  printf("Value which will be sent to the reg: 0x%04x \n", gain_sel_all);
+  
   hal_error = HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF1, 1, &gain_sel_all, 2, HAL_MAX_DELAY);
   printf("Hal status = %x\n", hal_error);
   printf("Set done.\n");
