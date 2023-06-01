@@ -672,9 +672,9 @@ void SetGain()
   gain_sel[0] = gain_sel[0] - 0x30;
 
   gain_sel_all = 0;
-  gain_sel_all = (((gain_sel[3] << 3) | gain_sel[2] << 2) | gain_sel[1] << 1) | gain_sel[0];      //0b0000 xxxx
+  gain_sel_all = (((gain_sel[3] << 3) | gain_sel[2] << 2) | gain_sel[1] << 1) | gain_sel[0];
   hal_error = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF1, 1, reg, 2, HAL_MAX_DELAY);
-  reg16 = reg[1] << 8 | reg[0];
+  reg16 = reg[0] << 8 | reg[1];
   reg16 = reg16 & 0b1111111100001111;
   gain_sel_all = reg16 | (gain_sel_all << 4);
   printf("Value which will be sent to the reg: %02x \n", gain_sel_all);
