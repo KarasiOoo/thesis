@@ -673,9 +673,15 @@ void SetGain()
 
   gain_sel_all = 0;
   gain_sel_all = (((gain_sel[3] << 3) | gain_sel[2] << 2) | gain_sel[1] << 1) | gain_sel[0];
+  printf("Value which will be injected: 0x%02x\n", gain_sel_all);
+
   hal_error = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF1, 1, reg, 2, HAL_MAX_DELAY);
   reg16 = reg[0] << 8 | reg[1];
+  printf("Value read from device: 0x%04x\n", reg16);
+
   reg16 = reg16 & 0b1111111100001111;
+  printf("Register prepared to inject new value: 0x%04x\n", reg16);
+
   gain_sel_all = reg16 | (gain_sel_all << 4);
   printf("Value which will be sent to the reg: %02x \n", gain_sel_all);
   printf("Hal status = %x\n", hal_error);
