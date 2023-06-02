@@ -739,7 +739,7 @@ void ReadConfig()
 void SetGain()
 {
   I2C_HandleTypeDef i2c_address;
-  uint8_t dev_address, sensor, reg[2];
+  uint8_t dev_address, sensor, reg[2], gain_sel_all_h, gain_sel_all_l;
   uint16_t gain_sel_all, reg16;
   uint8_t gain_sel[4];
   uint8_t hal_error;
@@ -795,7 +795,15 @@ void SetGain()
 
   gain_sel_all = reg16 | (gain_sel_all << 4);
   printf("Value which will be sent to the reg: 0x%04x \n", gain_sel_all);
-  
+
+  gain_sel_all_h = gain_sel_all >> 8;
+  printf("MSB part: 0x%02x: \n", gain_sel_all_h);
+
+  gain_sel_all_l = gain_sel_all & 0x00ff;
+  printf("LSB part: 0x%02x: \n", gain_sel_all_l);
+
+  gain_sel_all = (gain_sel_all_l << 8) | gain_sel_all_h;
+  printf("Corrected order for HAL method: 0x%04x: \n", gain_sel_all);
   hal_error = HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF1, 1, &gain_sel_all, 2, HAL_MAX_DELAY);
   printf("Hal status = %x\n", hal_error);
   printf("Set done.\n");
