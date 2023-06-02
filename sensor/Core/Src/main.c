@@ -503,6 +503,116 @@ void ReadMagneticBurstAveraged(uint8_t samples)
   return;
 }
 
+void SetOffsetManually(void)
+{
+  volatile uint8_t gain_m, gain_h, data_ready_m, data_ready_h, hal_error_m, hal_error_h, measure, num_of_samples;
+  uint8_t temp_mem_m[6], temp_mem_h[6];
+  i2c_measurement_memory memory_m[samples], memory_h[samples];
+  int16_t extended_xm, extended_ym, extended_zm, extended_xh, extended_yh, extended_zh;
+  int32_t value_xm[samples], value_ym[samples], value_zm[samples], value_xh[samples], value_yh[samples], value_zh[samples];
+  int64_t sum_value_xm, sum_value_ym, sum_value_zm, sum_value_xh, sum_value_yh, sum_value_zh;
+  HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, REG_CONF1, 1, &gain_m, 2, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, REG_CONF1, 1, &gain_h, 2, HAL_MAX_DELAY);
+
+  gain_m = gain_m >> 4;
+  gain_h = gain_h >> 4;
+
+  WriteRegMid(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
+  WriteRegHigh(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
+
+  for(measure = 0; measure < num_of_samples; measure++)
+  {
+    do
+    {
+      hal_error_m = HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, REG_I2C_ComandStatus, 1, &data_ready_m, 1, HAL_MAX_DELAY);
+      hal_error_h = HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, REG_I2C_ComandStatus, 1, &data_ready_h, 1, HAL_MAX_DELAY);
+
+      data_ready_m = data_ready_m & 0x1;        
+      data_ready_h = data_ready_h & 0x1;
+      HAL_Delay(1);
+    } while (data_ready_m != 1 || data_ready_h != 1);
+
+    if(data_ready_m == 1)
+    {
+      hal_error_m = HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, REG_I2CX2, 1, temp_mem_m, 6, HAL_MAX_DELAY);
+      
+      if(hal_error_m != 0x00)
+      {
+        printf("Error occur on Medium range sensor!\n");
+        break;
+      }
+
+      memory_m[measure].x1 = *(reg_8 *)&temp_mem_m[0];
+      memory_m[measure].x0 = *(reg_8 *)&temp_mem_m[1];
+      memory_m[measure].y1 = *(reg_8 *)&temp_mem_m[2];
+      memory_m[measure].y0 = *(reg_8 *)&temp_mem_m[3];
+      memory_m[measure].z1 = *(reg_8 *)&temp_mem_m[4];
+      memory_m[measure].z0 = *(reg_8 *)&temp_mem_m[5];
+
+      extended_xm = (int16_t)((int8_t)memory_m[measure].x1);
+      extended_ym = (int16_t)((int8_t)memory_m[measure].y1);
+      extended_zm = (int16_t)((int8_t)memory_m[measure].z1);
+
+      value_xm[measure] = (int32_t)extended_xm << 8 | memory_m[measure].x0;
+      value_ym[measure] = (int32_t)extended_ym << 8 | memory_m[measure].y0;
+      value_zm[measure] = (int32_t)extended_zm << 8 | memory_m[measure].z0;
+
+      value_xm[measure] = (((value_xm[measure] * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
+      value_ym[measure] = (((value_ym[measure] * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
+      value_zm[measure] = (((value_zm[measure] * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
+
+      sum_value_xm = sum_value_xm + value_xm[measure];
+      sum_value_ym = sum_value_ym + value_ym[measure];
+      sum_value_zm = sum_value_zm + value_zm[measure]; 
+    }
+
+    if(data_ready_h == 1)
+    {
+      hal_error_h = HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, REG_I2CX2, 1, temp_mem_h, 6, HAL_MAX_DELAY);
+      
+      if(hal_error_h != 0x00)
+      {
+        printf("Error occur on High range sensor!\n");
+        break;
+      }
+
+      memory_h[measure].x1 = *(reg_8 *)&temp_mem_h[0];
+      memory_h[measure].x0 = *(reg_8 *)&temp_mem_h[1];
+      memory_h[measure].y1 = *(reg_8 *)&temp_mem_h[2];
+      memory_h[measure].y0 = *(reg_8 *)&temp_mem_h[3];
+      memory_h[measure].z1 = *(reg_8 *)&temp_mem_h[4];
+      memory_h[measure].z0 = *(reg_8 *)&temp_mem_h[5];
+
+      extended_xh = (int16_t)((int8_t)memory_h[measure].x1);
+      extended_yh = (int16_t)((int8_t)memory_h[measure].y1);
+      extended_zh = (int16_t)((int8_t)memory_h[measure].z1);
+
+      value_xh[measure] = (int32_t)extended_xh << 8 | memory_h[measure].x0;
+      value_yh[measure] = (int32_t)extended_yh << 8 | memory_h[measure].z0;
+      value_zh[measure] = (int32_t)extended_zh << 8 | memory_h[measure].y0;
+
+      value_xh[measure] = (((value_xh[measure] * 1000) / 140) * gain_multiplier[gain_m]) / 1000;
+      value_yh[measure] = (((value_yh[measure] * 1000) / 140) * gain_multiplier[gain_m]) / 1000;
+      value_zh[measure] = (((value_zh[measure] * 1000) / 140) * gain_multiplier[gain_m]) / 1000;
+
+      sum_value_xh = sum_value_xh + value_xh[measure];
+      sum_value_yh = sum_value_yh + value_yh[measure];
+      sum_value_zh = sum_value_zh + value_zh[measure];
+    }  
+  }
+  offset_xm = sum_value_xm / samples;
+  offset_ym = sum_value_ym / samples;
+  offset_zm = sum_value_zm / samples;
+
+  offset_xh = sum_value_xh / samples;
+  offset_yh = sum_value_yh / samples;
+  offset_zh = sum_value_zh / samples;
+
+  printf("Offset calibration finished.\n");
+  WriteRegMid(REG_I2C_ComandStatus, EXIT_MODE);
+  WriteRegHigh(REG_I2C_ComandStatus, EXIT_MODE);
+}
+
 uint8_t SetSamples(void)
 {
   uint8_t get_samples[3];
@@ -1105,107 +1215,7 @@ int main(void)
         break;
       case 'o':
         printf("Offset calibration.\n");
-        
-        HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, REG_CONF1, 1, &gain_m, 1, HAL_MAX_DELAY);
-        HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, REG_CONF1, 1, &gain_h, 1, HAL_MAX_DELAY);
-
-        gain_m = gain_m >> 4;
-        gain_h = gain_h >> 4;
-
-        WriteRegMid(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
-        WriteRegHigh(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
-
-        for(measure = 0; measure < num_of_samples; measure++)
-        {
-          do
-          {
-            hal_error_m = HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, REG_I2C_ComandStatus, 1, &data_ready_m, 1, HAL_MAX_DELAY);
-            hal_error_h = HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, REG_I2C_ComandStatus, 1, &data_ready_h, 1, HAL_MAX_DELAY);
-
-            data_ready_m = data_ready_m & 0x1;        
-            data_ready_h = data_ready_h & 0x1;
-            HAL_Delay(1);
-          } while (data_ready_m != 1 || data_ready_h != 1);
-
-          if(data_ready_m == 1)
-          {
-            hal_error_m = HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, REG_I2CX2, 1, temp_mem_m, 6, HAL_MAX_DELAY);
-            
-            if(hal_error_m != 0x00)
-            {
-              printf("Error occur on Medium range sensor!\n");
-              break;
-            }
-
-            memory_m[measure].x1 = *(reg_8 *)&temp_mem_m[0];
-            memory_m[measure].x0 = *(reg_8 *)&temp_mem_m[1];
-            memory_m[measure].y1 = *(reg_8 *)&temp_mem_m[2];
-            memory_m[measure].y0 = *(reg_8 *)&temp_mem_m[3];
-            memory_m[measure].z1 = *(reg_8 *)&temp_mem_m[4];
-            memory_m[measure].z0 = *(reg_8 *)&temp_mem_m[5];
-
-            extended_xm = (int16_t)((int8_t)memory_m[measure].x1);
-            extended_ym = (int16_t)((int8_t)memory_m[measure].y1);
-            extended_zm = (int16_t)((int8_t)memory_m[measure].z1);
-
-            value_xm[measure] = (int32_t)extended_xm << 8 | memory_m[measure].x0;
-            value_ym[measure] = (int32_t)extended_ym << 8 | memory_m[measure].y0;
-            value_zm[measure] = (int32_t)extended_zm << 8 | memory_m[measure].z0;
-      
-            value_xm[measure] = (((value_xm[measure] * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
-            value_ym[measure] = (((value_ym[measure] * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
-            value_zm[measure] = (((value_zm[measure] * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
-
-            sum_value_xm = sum_value_xm + value_xm[measure];
-            sum_value_ym = sum_value_ym + value_ym[measure];
-            sum_value_zm = sum_value_zm + value_zm[measure]; 
-          }
-
-          if(data_ready_h == 1)
-          {
-            hal_error_h = HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, REG_I2CX2, 1, temp_mem_h, 6, HAL_MAX_DELAY);
-            
-            if(hal_error_h != 0x00)
-            {
-              printf("Error occur on High range sensor!\n");
-              break;
-            }
-
-            memory_h[measure].x1 = *(reg_8 *)&temp_mem_h[0];
-            memory_h[measure].x0 = *(reg_8 *)&temp_mem_h[1];
-            memory_h[measure].y1 = *(reg_8 *)&temp_mem_h[2];
-            memory_h[measure].y0 = *(reg_8 *)&temp_mem_h[3];
-            memory_h[measure].z1 = *(reg_8 *)&temp_mem_h[4];
-            memory_h[measure].z0 = *(reg_8 *)&temp_mem_h[5];
-
-            extended_xh = (int16_t)((int8_t)memory_h[measure].x1);
-            extended_yh = (int16_t)((int8_t)memory_h[measure].y1);
-            extended_zh = (int16_t)((int8_t)memory_h[measure].z1);
-
-            value_xh[measure] = (int32_t)extended_xh << 8 | memory_h[measure].x0;
-            value_yh[measure] = (int32_t)extended_yh << 8 | memory_h[measure].z0;
-            value_zh[measure] = (int32_t)extended_zh << 8 | memory_h[measure].y0;
-
-            value_xh[measure] = (((value_xh[measure] * 1000) / 140) * gain_multiplier[gain_m]) / 1000;
-            value_yh[measure] = (((value_yh[measure] * 1000) / 140) * gain_multiplier[gain_m]) / 1000;
-            value_zh[measure] = (((value_zh[measure] * 1000) / 140) * gain_multiplier[gain_m]) / 1000;
-
-            sum_value_xh = sum_value_xh + value_xh[measure];
-            sum_value_yh = sum_value_yh + value_yh[measure];
-            sum_value_zh = sum_value_zh + value_zh[measure];
-          }  
-        }
-        offset_xm = sum_value_xm / samples;
-        offset_ym = sum_value_ym / samples;
-        offset_zm = sum_value_zm / samples;
-
-        offset_xh = sum_value_xh / samples;
-        offset_yh = sum_value_yh / samples;
-        offset_zh = sum_value_zh / samples;
-
-        printf("Offset calibration finished.\n");
-        WriteRegMid(REG_I2C_ComandStatus, EXIT_MODE);
-        WriteRegHigh(REG_I2C_ComandStatus, EXIT_MODE);
+        SetOffsetManually();
         break;
       case 'a':
         printf("All configuration values:\n");
