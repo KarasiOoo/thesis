@@ -667,10 +667,9 @@ void ReadConfig()
   I2C_HandleTypeDef i2c_address;
   uint8_t dev_address, sensor;
 
-  uint8_t read_gain_sel, burst_data_rate, digital_filter_dislpayed, resolution_x, resolution_y, resolution_z;
-  uint8_t digital_filter[2], resolution[2], offset_x[2], offset_y[2], offset_z[2], sensitivity_xy[2], sensitivity_z[2];
-  uint16_t offset_x16, offset_y16, offset_z16, sensitivity_xy16, sensitivity_z16;
-  uint8_t hal_error_sens_xy, hal_error_sens_z;
+  uint8_t reg_zero[2], reg_one[2], reg_two[2], reg_six[2], reg_seven[2], reg_eight[2], reg_c[2], reg_d[2];
+  uint16_t reg_zero_complex, reg_one_complex, reg_two_complex, offset_x, offset_y, offset_z, sensitivity_xy, sensitivity_z;
+  uint8_t gain, burst_data_rate, burst_sel, digital_filter, resolution_x, resolution_y, resolution_z;
 
   printf("Select which sensor you want to perform measurement: 1 - mid, 2 - high.\n");
   HAL_UART_Receive(&huart2, &sensor, 1, HAL_MAX_DELAY); 
@@ -693,45 +692,46 @@ void ReadConfig()
     return;
   }
 
-  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF1, 1, &read_gain_sel, 1, HAL_MAX_DELAY);
-  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF2, 1, &burst_data_rate, 1, HAL_MAX_DELAY);
-  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF3, 1, digital_filter, 2, HAL_MAX_DELAY);
-  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF3, 1, resolution, 2, HAL_MAX_DELAY);
-  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_OffsetX, 1, offset_x, 2, HAL_MAX_DELAY);
-  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_OffsetY, 1, offset_y, 2, HAL_MAX_DELAY);
-  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_OffsetZ, 1, offset_z, 2, HAL_MAX_DELAY);
-  hal_error_sens_xy = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_SensXY, 1, sensitivity_xy, 2, HAL_MAX_DELAY);
-  printf("Status sensXY: %x\n", hal_error_sens_xy);
-  hal_error_sens_z = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_SensZ, 1, sensitivity_z, 2, HAL_MAX_DELAY);
-  printf("Status sensZ: %x\n", hal_error_sens_z);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF1, 1, reg_zero, 2, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF2, 1, reg_one, 2, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF3, 1, reg_two, 2, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_OffsetX, 1, reg_six, 2, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_OffsetY, 1, reg_seven, 2, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_OffsetZ, 1, reg_eight, 2, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_SensXY, 2, reg_c, 2, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF_SensZ, 2, reg_d, 2, HAL_MAX_DELAY);
 
-  read_gain_all = (read_gain[0] << 8) | read_gain[1];
-  read_gain_all = read_gain_all >> 4;
-  burst_data_rate = burst_data_rate & 0b00111111;
-  digital_filter_dislpayed = (digital_filter[0] & 0b00011100) >> 2;
-  resolution_x = (resolution[0] >> 5) & TWO_BITS;
-  resolution_y = ((resolution[1] << 1) | (resolution[0] >> 7)) & TWO_BITS;
-  //resolution_y = ((resolution[1] << 8 | resolution[0]) >> 7) & TWO_BITS;
-  resolution_z = (resolution[1] >> 1) & TWO_BITS;
-  offset_x16 = (offset_x[1] << 8) | offset_x[0];
-  //offset_x16 = (offset_x[0] << 8) | offset_x[1];
-  offset_y16 = (offset_y[1] << 8) | offset_y[0];
-  offset_z16 = (offset_z[1] << 8) | offset_z[0];
-  sensitivity_xy16 = (sensitivity_xy[1] << 8) | sensitivity_xy[0];
-  sensitivity_z16  = (sensitivity_z[1]  << 8 ) | sensitivity_z[0];
-  //sensitivity_z16 = (sensitivity_z[0] << 8 ) | sensitivity_z[1];
+  reg_zero_complex = (reg_zero[0] << 8) | reg_zero[1];
+  gain = (reg_zero_complex >> 4) & 0x0f;
 
-  printf("Gain:\t 0x%02x\n", read_gain_all);
-  printf("Burst data rate: 0x%04x\n", burst_data_rate_all);
-  printf("Digital Filter: 0x%02x\n", digital_filter_dislpayed);
+  reg_one_complex = (reg_one[0] << 8) | reg_one[1];
+  burst_data_rate = reg_one_complex & 0x1f;
+  burst_sel = (reg_one_complex >> 6) & 0x0f;
+
+  reg_two_complex = (reg_two[0] << 8) | reg_two[1];
+  digital_filter = (reg_two_complex >> 2) & 0x07;
+  resolution_x = (reg_two_complex >> 5) & 0x03;
+  resolution_y = (reg_two_complex >> 7) & 0x03;
+  resolution_z = (reg_two_complex >> 9) & 0x03;
+
+  offset_x = (reg_six[0] << 8) | reg_six[1];
+  offset_y = (reg_seven[0] << 8) | reg_seven[1];
+  offset_z = (reg_eight[0] << 8) | reg_eight[1];
+
+  sensitivity_xy = ((reg_c[0] << 8) | reg_c[1]) & 0x01ff;
+  sensitivity_z = ((reg_d[0] << 8) | reg_d[1]) & 0x01ff;
+
+  printf("Gain:\t 0x%02x\n", gain);
+  printf("Burst data rate: 0x%04x\n", burst_data_rate);
+  printf("Digital Filter: 0x%02x\n", digital_filter);
   printf("Resolution X: 0x%02x\n", resolution_x);
   printf("Resolution Y: 0x%02x\n", resolution_y);
   printf("Resolution Z: 0x%02x\n", resolution_z);
-  //printf("Offset X:\t %04x\n", offset_x16);
-  //printf("Offset Y:\t %04x\n", offset_y16);
-  //printf("Offset Z:\t %04x\n", offset_z16);
-  printf("Sensitivity XY: 0x%04x\n", sensitivity_xy16);
-  printf("Sensitivity Z: 0x%04x\n", sensitivity_z16);
+  printf("Offset X:\t 0x%04x\n", offset_x);
+  printf("Offset Y:\t 0x%04x\n", offset_y);
+  printf("Offset Z:\t 0x%04x\n", offset_z);
+  printf("Sensitivity XY: 0x%04x\n", sensitivity_xy);
+  printf("Sensitivity Z: 0x%04x\n", sensitivity_z);
 
   return;
 }
