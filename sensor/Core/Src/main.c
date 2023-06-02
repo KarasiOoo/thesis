@@ -278,7 +278,6 @@ void ReadMagneticBurstAveraged(uint8_t samples)
 
   WriteRegMid(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
   WriteRegHigh(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
-  HAL_UART_Receive(&huart2, &entry_meas, 1, 10); 
   
   printf("   Mid:, \t High:\n");
 
