@@ -423,7 +423,7 @@ void ReadMagneticBurstAveraged(uint8_t samples)
     {
       p_value_xm = f_value_xm;
     }
-    printf("%02ld.%03i,\t ", i_value_xm, p_value_xm);
+    printf("%02ld.%03ld,\t ", i_value_xm, p_value_xm);
 
     if (f_value_xh < 0)
     {
@@ -437,7 +437,7 @@ void ReadMagneticBurstAveraged(uint8_t samples)
     {
       p_value_xh = f_value_xh;
     }
-    printf("%02ld.%03i\n", i_value_xh, p_value_xh);
+    printf("%02ld.%03ld\n", i_value_xh, p_value_xh);
 
     printf("Y: ");
     if (f_value_ym < 0)
@@ -452,7 +452,7 @@ void ReadMagneticBurstAveraged(uint8_t samples)
     {
       p_value_ym = f_value_ym;
     }
-    printf("%02ld.%03i,\t ", (int32_t)i_value_ym, p_value_ym);
+    printf("%02ld.%03ld,\t ", (int32_t)i_value_ym, p_value_ym);
 
     if (f_value_yh < 0)
     {
@@ -466,7 +466,7 @@ void ReadMagneticBurstAveraged(uint8_t samples)
     {
       p_value_yh = f_value_yh;
     }
-    printf("%02ld.%03i\n", (int32_t)i_value_yh, p_value_yh);
+    printf("%02ld.%03ld\n", (int32_t)i_value_yh, p_value_yh);
 
     printf("Z: ");
     if (f_value_zm < 0)
@@ -481,7 +481,7 @@ void ReadMagneticBurstAveraged(uint8_t samples)
     {
       p_value_zm = f_value_zm;
     }
-    printf("%02ld.%03i,\t ", (int32_t)i_value_zm, p_value_zm);
+    printf("%02ld.%03ld,\t ", (int32_t)i_value_zm, p_value_zm);
 
     if (f_value_zh < 0)
     {
@@ -495,7 +495,7 @@ void ReadMagneticBurstAveraged(uint8_t samples)
     {
       p_value_zh = f_value_zh;
     }
-    printf("%02ld.%03i\n\n\n", (int32_t)i_value_zh, p_value_zh);
+    printf("%02ld.%03ld\n\n\n", (int32_t)i_value_zh, p_value_zh);
   }
   printf("Measurement finished.\n");
   WriteRegMid(REG_I2C_ComandStatus, EXIT_MODE);
