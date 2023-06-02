@@ -721,17 +721,17 @@ void ReadConfig()
   sensitivity_z16  = (sensitivity_z[1]  << 8 ) | sensitivity_z[0];
   //sensitivity_z16 = (sensitivity_z[0] << 8 ) | sensitivity_z[1];
 
-  printf("Gain:\t %02x\n", read_gain_sel);
-  printf("Burst data rate: %02x\n", burst_data_rate);
-  printf("Digital Filter: %02x\n", digital_filter_dislpayed);
-  printf("Resolution X: %02x\n", resolution_x);
-  printf("Resolution Y: %02x\n", resolution_y);
-  printf("Resolution Z: %02x\n", resolution_z);
+  printf("Gain:\t 0x%02x\n", read_gain_all);
+  printf("Burst data rate: 0x%04x\n", burst_data_rate_all);
+  printf("Digital Filter: 0x%02x\n", digital_filter_dislpayed);
+  printf("Resolution X: 0x%02x\n", resolution_x);
+  printf("Resolution Y: 0x%02x\n", resolution_y);
+  printf("Resolution Z: 0x%02x\n", resolution_z);
   //printf("Offset X:\t %04x\n", offset_x16);
   //printf("Offset Y:\t %04x\n", offset_y16);
   //printf("Offset Z:\t %04x\n", offset_z16);
-  printf("Sensitivity XY: %04x\n", sensitivity_xy16);
-  printf("Sensitivity Z: %04x\n", sensitivity_z16);
+  printf("Sensitivity XY: 0x%04x\n", sensitivity_xy16);
+  printf("Sensitivity Z: 0x%04x\n", sensitivity_z16);
 
   return;
 }
