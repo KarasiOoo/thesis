@@ -1083,7 +1083,8 @@ int main(void)
         break;
       case 'b':
         printf("Continues measurement:\n");
-        ReadMagneticBurst();
+        ReadMagneticBurstAveraged(samples);
+        break;
       case 'n':
         printf("Set amount of samples.\n");
         samples = SetSamples();
