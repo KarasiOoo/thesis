@@ -943,6 +943,72 @@ void SetSensitivity()
   return;
 }
 
+void ReadReg(void)
+{
+  uint8_t sensor, reg_conf, reg_address, dev_address;
+  uint8_t value[2];
+  //uint16_t value;
+  uint16_t value_displayed;
+  I2C_HandleTypeDef i2c_address;
+
+  printf("Choose sensor: \n");
+  HAL_UART_Receive(&huart2, &sensor, 1, HAL_MAX_DELAY);
+
+  if(sensor == '1')
+  {
+    i2c_address = hi2c1;
+    dev_address = MEDIUM_SENSOR;
+    printf("Medium range sensor: \n");
+  }
+  else if (sensor == '2')
+  {
+    i2c_address = hi2c2;
+    dev_address = HIGH_SENSOR;
+    printf("High range sensor: \n");
+  }
+  else
+  {
+    printf("Wrong number given!\n");
+    return;
+  }
+
+  printf("Choose register: \n");
+  printf("z - REG_CONF1\n");
+  printf("x - REG_CONF2\n");
+  printf("c - REG_CONF3\n");
+  printf("v - REG_CONF_OffsetX\n");
+  printf("b - REG_CONF_OffsetY\n");
+  printf("n - REG_CONF_OffsetZ\n");
+  HAL_UART_Receive(&huart2, &reg_conf, 1, HAL_MAX_DELAY); 
+
+  switch(reg_conf)
+  {
+    case 'z':
+      reg_address = REG_CONF1;
+      break;
+    case 'x':
+      reg_address = REG_CONF2;
+      break;
+    case 'c':
+      reg_address = REG_CONF3;
+      break;
+    case 'v':
+      reg_address = REG_CONF_OffsetX;
+      break;
+    case 'b':
+      reg_address = REG_CONF_OffsetY;
+      break;
+    case 'n':
+      reg_address = REG_CONF_OffsetZ;
+      break;
+  }
+
+  HAL_I2C_Mem_Read(&i2c_address, dev_address, reg_address, 1, &value, 2, HAL_MAX_DELAY);
+  //HAL_I2C_Mem_Read(&i2c_address, dev_address, (reg_address + 0b1), 1, &value[1], 1, HAL_MAX_DELAY);
+  value_displayed = (value[0] << 8) | value[1];
+  printf("Register value: 0x%04x\n", value_displayed);
+  return;
+}
 int main(void)
 {
   uint8_t v_en = 1;                                           
@@ -1028,6 +1094,9 @@ int main(void)
         WriteRegHigh(REG_I2C_ComandStatus, RESET_SENSOR);
         HAL_Delay(300);
         printf("Device reset done\n");
+        break;
+      case 'q':
+        ReadReg();
         break;
       case 'c':
         ReadStatus(1);
