@@ -790,7 +790,7 @@ void SetGain()
   reg16 = reg[0] << 8 | reg[1];
   printf("Value read from device: 0x%04x\n", reg16);
 
-  reg16 = reg16 & 0b1111111100001111;
+  reg16 = reg16 & 0xff0f;
   printf("Register prepared to inject new value: 0x%04x\n", reg16);
 
   gain_sel_all = reg16 | (gain_sel_all << 4);
