@@ -1156,6 +1156,7 @@ int main(void)
     printf("\t b - Continues magnetic field and temperature.\n");
     printf("\t n - Set amount of samples to take average from it in Continues measurement.\n");
     printf("\t z - Reset.\n");
+    printf("\t q - Check RAW config register value.\n");
     printf("Calibration/settings:\n");
     printf("\t c - Show status reg.\n");
     printf("\t o - Calibrate offset for both sensors.\n");
