@@ -28,10 +28,10 @@ extern "C" {
 #define REG_CONF_OffsetDriftZ 0x16
 #define REG_CONF_SensXY 0x18
 #define REG_CONF_SensZ 0x1A
-#define REG_CONF_WocXYThreshold 0x0E
-#define REG_CONF_WocZThreshold 0x0F
-#define REG_CONF_WocTTThreshold 0x10
-#define REG_CONF_WocVThreshold 0x11
+#define REG_CONF_WocXYThreshold 0x1C
+#define REG_CONF_WocZThreshold 0x1E
+#define REG_CONF_WocTTThreshold 0x20
+#define REG_CONF_WocVThreshold 0x22
 
 #define REG_I2C_ComandStatus 0x80
 #define REG_I2C_CRC8CCITT 0x81
