@@ -75,61 +75,30 @@ int16_t BinaryToDecimal (int16_t binary)
   return decimal;
 }
 
-void ReadMagnetic()
+void ReadMagneticRaw()
 {
   I2C_HandleTypeDef i2c_address;
-  uint8_t dev_address, sensor;
+  uint8_t dev_address;
   
-  uint8_t memory[12];
+  uint8_t memory_m[6], memory_h[6];
+  uint16_t raw_xm, raw_ym, raw_zm, raw_xh, raw_yh, raw_zh;
   int16_t measured_value_x, measured_value_y, measured_value_z, sensitivity;
-  //int16_t measured_decimal_value_x, measured_decimal_value_y, measured_decimal_value_z;
   int32_t measured_value_xf, measured_value_yf, measured_value_zf;
-  int16_t calibration_x, calibration_y, calibration_z;
 
-  printf("Select which sensor you want to perform measurement: 1 - mid, 2 - high.\n");
-  HAL_UART_Receive(&huart2, &sensor, 1, HAL_MAX_DELAY); 
-
-  if(sensor == '1')
-  {
-    i2c_address = hi2c1;
-    dev_address = MEDIUM_SENSOR;
-    calibration_x = xm_cal;
-    calibration_y = ym_cal;
-    calibration_z = zm_cal;
-    sensitivity = 400;
-    printf("Medium range sensor: \n");
-  }
-  else if (sensor == '2')
-  {
-    i2c_address = hi2c2;
-    dev_address = HIGH_SENSOR;
-    calibration_x = xh_cal;
-    calibration_y = yh_cal;
-    calibration_z = zh_cal;
-    sensitivity = 140;
-    printf("High range sensor: \n");
-  }
-  else
-  {
-    printf("Wrong number given!\n");
-    return;
-  }
   
-  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_I2C_ComandStatus, 1, memory, 12, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, REG_I2CX2, 1, memory_m, 6, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, REG_I2CX2, 1, memory_h, 6, HAL_MAX_DELAY);
 
-  measured_value_x = memory[2] << 8 | memory[3];
-  measured_value_y = memory[4] << 8 | memory[5];
-  measured_value_z = memory[6] << 8 | memory[7];
+  raw_xm = memory_m[0] << 8 | memory_m[1];
+  raw_ym = memory_m[2] << 8 | memory_m[3];
+  raw_zm = memory_m[4] << 8 | memory_m[5];
 
-  measured_value_xf = measured_value_x * 1000 / sensitivity;
-  measured_value_yf = measured_value_y * 1000 / sensitivity;
-  measured_value_zf = measured_value_z * 1000 / sensitivity;
+  raw_xh = memory_h[0] << 8 | memory_h[1];
+  raw_yh = memory_h[2] << 8 | memory_h[3];
+  raw_zh = memory_h[4] << 8 | memory_h[5];
 
-  //measured_value_xf = measured_value_xf - calibration_x;
-  //measured_value_yf = measured_value_yf - calibration_y;
-  //measured_value_zf = measured_value_zf - calibration_z;
 
-  printf("X: %05ld,\t Y: %05ld,\t Z: %05ld (uT)\n", measured_value_xf, measured_value_yf, measured_value_zf);
+  printf("X: %x,\t Y: %x,\t Z: %x \nX: %x,\t Y: %x,\t Z: %x \n", raw_xm, raw_ym, raw_zm, raw_xh, raw_yh, raw_zh);
   return;
 }
 
@@ -1150,7 +1119,7 @@ int main(void)
     uint8_t action, new_task;
     printf("Choose action:\n");
     printf("Measure:\n");
-    printf("\t m - Once magnetic field.\n");
+    printf("\t m - Once magnetic field in RAW form.\n");
     printf("\t t - Once temperature.\n");
     printf("\t v - Once voltage.\n");
     printf("\t b - Continues magnetic field and temperature.\n");
@@ -1177,7 +1146,7 @@ int main(void)
         WriteRegMid(REG_I2C_ComandStatus, SINGLE_MEASURE_MAGNETIC);
         WriteRegHigh(REG_I2C_ComandStatus, SINGLE_MEASURE_MAGNETIC);
         printf("Measured values of magnetic field:\n");
-        ReadMagnetic();
+        ReadMagneticRaw();
         break;
       case 't':
         WriteRegMid(REG_I2C_ComandStatus, SINGLE_MEASURE_TEMPERATURE);
