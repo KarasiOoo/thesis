@@ -749,6 +749,7 @@ void SetGain()
 
   hal_error = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF1, 1, reg, 2, HAL_MAX_DELAY);
   printf("Hal status = %x\n", hal_error);
+
   reg16 = reg[0] << 8 | reg[1];
   printf("Value read from device: 0x%04x\n", reg16);
 
@@ -760,7 +761,6 @@ void SetGain()
 
   gain_sel_all_h = gain_sel_all >> 8;
   printf("MSB part: 0x%02x: \n", gain_sel_all_h);
-
   gain_sel_all_l = gain_sel_all & 0x00ff;
   printf("LSB part: 0x%02x: \n", gain_sel_all_l);
 
