@@ -92,7 +92,7 @@ void ReadMagneticRaw()
   raw_zh = (uint16_t)(memory_h[4] << 8 | memory_h[5]);
 
 
-  printf("X: %x,\t Y: %x,\t Z: %x \nX: %x,\t Y: %x,\t Z: %x \n", raw_xm, raw_ym, raw_zm, raw_xh, raw_yh, raw_zh);
+  printf("X: %04x,\t Y: %04x,\t Z: %04x \nX: %04x,\t Y: %04x,\t Z: %04x \n", raw_xm, raw_ym, raw_zm, raw_xh, raw_yh, raw_zh);
   return;
 }
 
