@@ -77,14 +77,8 @@ int16_t BinaryToDecimal (int16_t binary)
 
 void ReadMagneticRaw()
 {
-  I2C_HandleTypeDef i2c_address;
-  uint8_t dev_address;
-  
   uint8_t memory_m[6], memory_h[6];
   uint16_t raw_xm, raw_ym, raw_zm, raw_xh, raw_yh, raw_zh;
-  int16_t measured_value_x, measured_value_y, measured_value_z, sensitivity;
-  int32_t measured_value_xf, measured_value_yf, measured_value_zf;
-
   
   HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, REG_I2CX2, 1, memory_m, 6, HAL_MAX_DELAY);
   HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, REG_I2CX2, 1, memory_h, 6, HAL_MAX_DELAY);
