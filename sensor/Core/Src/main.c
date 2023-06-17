@@ -465,7 +465,7 @@ void ReadMagneticBurstAveraged(uint8_t samples)
 
 void SetOffsetManually(void)
 {
-  volatile uint8_t gain_m, gain_h, data_ready_m, data_ready_h, hal_error_m, hal_error_h, measure, num_of_samples;
+  uint8_t gain_m, gain_h, data_ready_m, data_ready_h, hal_error_m, hal_error_h, measure, num_of_samples;
   uint8_t temp_mem_m[6], temp_mem_h[6];
   i2c_measurement_memory memory_m[samples], memory_h[samples];
   int16_t extended_xm, extended_ym, extended_zm, extended_xh, extended_yh, extended_zh;
