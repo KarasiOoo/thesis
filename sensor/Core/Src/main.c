@@ -776,7 +776,7 @@ void SetBurstDataRate()
   I2C_HandleTypeDef i2c_address;
   uint8_t dev_address, sensor;
 
-  uint8_t burst_data_rate[6], reg[2];
+  uint8_t burst_data_rate[6], reg[2], burst_data_rate_h, burst_data_rate_l;
   uint8_t burst_data_rate_all, hal_error;
   uint16_t reg16;
 
@@ -820,18 +820,38 @@ void SetBurstDataRate()
   burst_data_rate[2] = burst_data_rate[2] - 0x30;
   burst_data_rate[1] = burst_data_rate[1] - 0x30;
   burst_data_rate[0] = burst_data_rate[0] - 0x30;
-
+  
   burst_data_rate_all = 0;
   burst_data_rate_all = (((((burst_data_rate[5] << 5) | burst_data_rate[4] << 4) | burst_data_rate[3] << 3) | burst_data_rate[2] << 2) 
                         | burst_data_rate[1] << 1) | burst_data_rate[0];
   hal_error = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF2, 1, reg, 2, HAL_MAX_DELAY);
-  printf("Hal status = %x\n", hal_error);
-  reg16 = reg[1] << 8 | reg[0];
-  reg16 = reg16 & 0xFFC0;
+  if(hal_error != 0)
+  {
+    printf("Hal status = %x\n", hal_error);
+  }
+  
+  reg16 = reg[0] << 8 | reg[1];
+  printf("Value read from register: %04x\n", reg16);
+
+  reg16 = reg16 & 0xffc0;
+  printf("Register prepared to aquire new settings: %04x \n", reg16);
+
   reg16 = reg16 | burst_data_rate_all;
-  printf("Value which will be sent to the reg: %02x \n", reg16);
+  printf("New register value: %02x \n", reg16);
+
+  burst_data_rate_h = reg16 >> 8;
+  printf("MSB part: 0x%02x: \n", burst_data_rate_h);
+  burst_data_rate_l = reg16 & 0x00ff;
+  printf("LSB part: 0x%02x: \n", burst_data_rate_l);
+
+  reg16 = (burst_data_rate_l << 8) | burst_data_rate_h;
+  printf("Value which will be sent to register: %02x \n", reg16);
+
   hal_error = HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF2, 1, &reg16, 2, HAL_MAX_DELAY);
-  printf("Hal status = %x\n", hal_error);
+  if(hal_error != 0)
+  {
+    printf("Hal status = %x\n", hal_error);
+  }
   printf("Set done.\n");
   return;
 }
