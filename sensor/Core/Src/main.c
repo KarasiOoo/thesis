@@ -684,6 +684,7 @@ void ReadConfig()
 
   printf("Gain:\t 0x%02x\n", gain);
   printf("Burst data rate: 0x%04x\n", burst_data_rate);
+  printf("Selected parameters to measure: 0x%02x\n", burst_sel);
   printf("Digital Filter: 0x%02x\n", digital_filter);
   printf("Resolution X: 0x%02x\n", resolution_x);
   printf("Resolution Y: 0x%02x\n", resolution_y);
