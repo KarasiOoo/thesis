@@ -83,13 +83,13 @@ void ReadMagneticRaw()
   HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, REG_I2CX2, 1, memory_m, 6, HAL_MAX_DELAY);
   HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, REG_I2CX2, 1, memory_h, 6, HAL_MAX_DELAY);
 
-  raw_xm = memory_m[0] << 8 | memory_m[1];
-  raw_ym = memory_m[2] << 8 | memory_m[3];
-  raw_zm = memory_m[4] << 8 | memory_m[5];
+  raw_xm = (uint16_t)(memory_m[0] << 8 | memory_m[1]);
+  raw_ym = (uint16_t)(memory_m[2] << 8 | memory_m[3]);
+  raw_zm = (uint16_t)(memory_m[4] << 8 | memory_m[5]);
 
-  raw_xh = memory_h[0] << 8 | memory_h[1];
-  raw_yh = memory_h[2] << 8 | memory_h[3];
-  raw_zh = memory_h[4] << 8 | memory_h[5];
+  raw_xh = (uint16_t)(memory_h[0] << 8 | memory_h[1]);
+  raw_yh = (uint16_t)(memory_h[2] << 8 | memory_h[3]);
+  raw_zh = (uint16_t)(memory_h[4] << 8 | memory_h[5]);
 
 
   printf("X: %x,\t Y: %x,\t Z: %x \nX: %x,\t Y: %x,\t Z: %x \n", raw_xm, raw_ym, raw_zm, raw_xh, raw_yh, raw_zh);
