@@ -131,9 +131,7 @@ void ReadTemperature()
   t_val = (t_val) / 50;
 
   printf("Temperature: %d\n", t_val);
-
   return;
-
 }
 
 void ReadMagneticTemperature()
