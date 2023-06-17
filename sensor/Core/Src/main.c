@@ -216,7 +216,7 @@ void ReadVoltage(uint8_t sensor)
 
 void ReadMagneticBurstAveraged(uint8_t samples)
 {
-  uint8_t entry_meas, exit_meas, state, measure, print_m_ready, print_h_ready, hal_error;
+  uint8_t entry_meas, exit_meas, state, measure, hal_error_m, hal_error_h;
   uint8_t gain_m, gain_h, res_m[2], res_h[2], resolution_m, resolution_h;
   uint8_t temp_mem_m[6], temp_mem_h[6], data_ready_m, data_ready_h;
   i2c_measurement_memory memory_m[samples], memory_h[samples];
