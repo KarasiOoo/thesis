@@ -666,7 +666,7 @@ void ReadConfig()
   gain = (reg_zero_complex >> 4) & 0x0f;
 
   reg_one_complex = (reg_one[0] << 8) | reg_one[1];
-  burst_data_rate = reg_one_complex & 0x1f;
+  burst_data_rate = reg_one_complex & 0x3f;
   burst_sel = (reg_one_complex >> 6) & 0x0f;
 
   reg_two_complex = (reg_two[0] << 8) | reg_two[1];
