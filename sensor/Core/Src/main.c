@@ -894,10 +894,10 @@ void SetDigFilter()
 void SetResolution()
 {
   I2C_HandleTypeDef i2c_address;
-  uint8_t dev_address, sensor, resolution;
-  uint8_t reg_r[2];
+  uint8_t dev_address, sensor, hal_error, mode;
+  uint8_t reg[2], resolution, resolution_h, resolution_l;
   uint8_t x_res[2], y_res[2], z_res[2];
-  uint16_t reg_w;
+  uint16_t reg16;
 
   printf("Select which sensor you want to configure: 1 - mid, 2 - high.\n");
   HAL_UART_Receive(&huart2, &sensor, 1, HAL_MAX_DELAY);
@@ -920,34 +920,83 @@ void SetResolution()
     return;
   }
 
-  printf("Set higher X bit: (0 or 1)\n");
-  HAL_UART_Receive(&huart2, &x_res[1], 1, HAL_MAX_DELAY);
-  printf("Set lower X bit: (0 or 1)\n");
-  HAL_UART_Receive(&huart2, &x_res[0], 1, HAL_MAX_DELAY);
-  printf("Set higher Y bit: (0 or 1)\n");
-  HAL_UART_Receive(&huart2, &y_res[1], 1, HAL_MAX_DELAY);
-  printf("Set lower Y bit: (0 or 1)\n");
-  HAL_UART_Receive(&huart2, &y_res[0], 1, HAL_MAX_DELAY);
-  printf("Set higher Z bit: (0 or 1)\n");
-  HAL_UART_Receive(&huart2, &z_res[1], 1, HAL_MAX_DELAY);
-  printf("Set lower Z bit: (0 or 1)\n");
-  HAL_UART_Receive(&huart2, &z_res[0], 1, HAL_MAX_DELAY);
+  printf("Do you want to set resolution for all dimentions(press 1) or for each individually(press 2)?\n");
+  HAL_UART_Receive(&huart2, &mode, 1, HAL_MAX_DELAY);
 
-  x_res[1] = x_res[1] - 0x30;
-  x_res[0] = x_res[0] - 0x30;
-  y_res[1] = y_res[1] - 0x30;
-  y_res[0] = y_res[0] - 0x30;
-  z_res[1] = z_res[1] - 0x30;
-  z_res[0] = z_res[0] - 0x30;
+  if(mode == '1')
+  {
+    printf("Set higher bit: (0 or 1)\n");
+    HAL_UART_Receive(&huart2, &x_res[1], 1, HAL_MAX_DELAY);
+    printf("Set lower bit: (0 or 1)\n");
+    HAL_UART_Receive(&huart2, &x_res[0], 1, HAL_MAX_DELAY);
+    x_res[1] = x_res[1] - 0x30;
+    x_res[0] = x_res[0] - 0x30;
+    y_res[1] = x_res[1];
+    y_res[0] = x_res[0];
+    z_res[1] = x_res[1];
+    z_res[0] = x_res[0];
+  }
+  else if(mode == '2')
+  {
+    printf("Set higher X bit: (0 or 1)\n");
+    HAL_UART_Receive(&huart2, &x_res[1], 1, HAL_MAX_DELAY);
+    printf("Set lower X bit: (0 or 1)\n");
+    HAL_UART_Receive(&huart2, &x_res[0], 1, HAL_MAX_DELAY);
+    printf("Set higher Y bit: (0 or 1)\n");
+    HAL_UART_Receive(&huart2, &y_res[1], 1, HAL_MAX_DELAY);
+    printf("Set lower Y bit: (0 or 1)\n");
+    HAL_UART_Receive(&huart2, &y_res[0], 1, HAL_MAX_DELAY);
+    printf("Set higher Z bit: (0 or 1)\n");
+    HAL_UART_Receive(&huart2, &z_res[1], 1, HAL_MAX_DELAY);
+    printf("Set lower Z bit: (0 or 1)\n");
+    HAL_UART_Receive(&huart2, &z_res[0], 1, HAL_MAX_DELAY);
+
+    x_res[1] = x_res[1] - 0x30;
+    x_res[0] = x_res[0] - 0x30;
+    y_res[1] = y_res[1] - 0x30;
+    y_res[0] = y_res[0] - 0x30;
+    z_res[1] = z_res[1] - 0x30;
+    z_res[0] = z_res[0] - 0x30;
+  }
+  
   resolution = ((((z_res[1] << 5 | z_res[0] << 4) | y_res[1] << 3) | y_res[0] << 2) | x_res[1] << 1) | x_res[0];
+  printf("Value which will be written as new settings: %04x\n", resolution);
 
-  HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF3, 1, reg_r, 2, HAL_MAX_DELAY);
-  reg_w = (reg_r[1] << 8) | reg_r[0];
-  reg_w = reg_w & (0b11000000 << 5);
-  reg_w = reg_w | (resolution << 5);
-  printf("Value which will be sent to the reg: %04x \n", reg_w);
-  HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF3, 1, &reg_w, 2, HAL_MAX_DELAY);
-  printf("Set done.\n");
+  hal_error = HAL_I2C_Mem_Read(&i2c_address, dev_address, REG_CONF3, 1, reg, 2, HAL_MAX_DELAY);
+  if(hal_error != 0)
+  {
+    printf("Error occur during reading register (REG_CONF3): %02x\n", hal_error);
+    printf("Aborting settings and returning to menu.\n");
+    return;
+  }
+
+  reg16 = (reg[0] << 8) | reg[1];
+  printf("Value read from register: %04x\n", reg16);
+
+  reg16 = reg16 & 0xf81f;
+  printf("Register prepared for new settings: %04x\n", reg16);
+
+  reg16 = reg16 | (resolution << 5);
+  printf("Register with new settings: %04x \n", reg16);
+
+  resolution_h = reg16 >> 8;
+  printf("MSB part: 0x%02x: \n", resolution_h);
+  resolution_l = reg16 & 0x00ff;
+  printf("LSB part: 0x%02x: \n", resolution_l);
+
+  reg16 = (resolution_l << 8) | resolution_h;
+  printf("Corrected order for HAL method: 0x%04x: \n", reg16);
+
+  HAL_I2C_Mem_Write(&i2c_address, dev_address, REG_CONF3, 1, &reg16, 2, HAL_MAX_DELAY);
+  if(hal_error != 0)
+  {
+    printf("Error occur during reading register (REG_CONF3): %02x\n", hal_error);
+    printf("Aborting settings and returning to menu.\n");
+  }
+  else
+  {
+    printf("Set done.\n");
+  }
   return;
 }
 
