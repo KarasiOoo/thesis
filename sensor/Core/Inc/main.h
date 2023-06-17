@@ -67,6 +67,9 @@ extern "C" {
 
 #define TWO_BITS 0b00000011
 
+#define medium_sensor_constant 400
+#define high_sensor_constant 140
+
 //#define MLX_I2C_M ((i2c_memory *) 0x80)
 //#define MLX_I2C_H ((i2c_memory *) 0x80)
 
@@ -88,6 +91,8 @@ typedef struct _memory_i2c
 /* Exported constants --------------------------------------------------------*/
 static uint16_t gain_multiplier[16] = {200, 250, 330, 400, 500, 600, 750, 1000,
 					 100, 125, 167, 200, 250, 300, 375, 500};
+
+static uint16_t resolution_correction[4] = {1, 2, 4, 8};
 /* Exported functions  -------------------------------------------------------*/
 void Error_Handler(void);
 

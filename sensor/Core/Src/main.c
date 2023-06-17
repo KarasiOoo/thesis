@@ -217,7 +217,8 @@ void ReadVoltage(uint8_t sensor)
 void ReadMagneticBurstAveraged(uint8_t samples)
 {
   uint8_t entry_meas, exit_meas, state, measure, print_m_ready, print_h_ready, hal_error;
-  uint8_t gain_m, gain_h, temp_mem_m[6], temp_mem_h[6], data_ready_m, data_ready_h, hal_error_m, hal_error_h;
+  uint8_t gain_m, gain_h, res_m[2], res_h[2], resolution_m, resolution_h;
+  uint8_t temp_mem_m[6], temp_mem_h[6], data_ready_m, data_ready_h;
   i2c_measurement_memory memory_m[samples], memory_h[samples];
   int16_t ext_xm, ext_ym, ext_zm, ext_xh, ext_yh, ext_zh;
   int32_t value_xm[samples], value_ym[samples], value_zm[samples], value_xh[samples], value_yh[samples], value_zh[samples];
@@ -236,6 +237,12 @@ void ReadMagneticBurstAveraged(uint8_t samples)
 
   gain_m = gain_m >> 4;
   gain_h = gain_h >> 4;
+
+  HAL_I2C_Mem_Read(&hi2c1, MEDIUM_SENSOR, REG_CONF3, 1, res_m, 2, HAL_MAX_DELAY);
+  HAL_I2C_Mem_Read(&hi2c2, HIGH_SENSOR, REG_CONF3, 1, res_h, 2, HAL_MAX_DELAY);
+
+  resolution_m = res_m[0] << 8 | res_m[1];
+  resolution_h = res_h[0] << 8 | res_h[1];
 
   WriteRegMid(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
   WriteRegHigh(REG_I2C_ComandStatus, BURST_MEASURE_MAGNETIC);
@@ -289,9 +296,9 @@ void ReadMagneticBurstAveraged(uint8_t samples)
         value_ym[measure] = (int32_t)ext_ym << 8 | memory_m[measure].y0;
         value_zm[measure] = (int32_t)ext_zm << 8 | memory_m[measure].z0;
    
-        value_xm[measure] = (((value_xm[measure] * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
-        value_ym[measure] = (((value_ym[measure] * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
-        value_zm[measure] = (((value_zm[measure] * 1000) / 400) * gain_multiplier[gain_m]) / 1000;
+        value_xm[measure] = (((value_xm[measure] * gain_multiplier[gain_m] / 1000) * resolution_correction[((resolution_m >> 5) & 0x03)]) * 1000) / medium_sensor_constant;
+        value_ym[measure] = (((value_ym[measure] * gain_multiplier[gain_m] / 1000) * resolution_correction[((resolution_m >> 7) & 0x03)]) * 1000) / medium_sensor_constant;
+        value_zm[measure] = (((value_zm[measure] * gain_multiplier[gain_m] / 1000) * resolution_correction[((resolution_m >> 9) & 0x03)]) * 1000) / medium_sensor_constant;
 
         sum_value_xm = sum_value_xm + value_xm[measure];
         sum_value_ym = sum_value_ym + value_ym[measure];
@@ -324,9 +331,9 @@ void ReadMagneticBurstAveraged(uint8_t samples)
         value_yh[measure] = (int32_t)ext_yh << 8 | memory_h[measure].y0;
         value_zh[measure] = (int32_t)ext_zh << 8 | memory_h[measure].z0;
 
-        value_xh[measure] = (((value_xh[measure] * 1000) / 140) * gain_multiplier[gain_m]) / 1000;
-        value_yh[measure] = (((value_yh[measure] * 1000) / 140) * gain_multiplier[gain_m]) / 1000;
-        value_zh[measure] = (((value_zh[measure] * 1000) / 140) * gain_multiplier[gain_m]) / 1000;
+        value_xh[measure] = (((value_xh[measure] * gain_multiplier[gain_h] / 1000) * resolution_correction[(resolution_h >> 5) & 0x03]) * 1000) / high_sensor_constant;
+        value_yh[measure] = (((value_yh[measure] * gain_multiplier[gain_h] / 1000) * resolution_correction[(resolution_h >> 7) & 0x03]) * 1000) / high_sensor_constant;
+        value_zh[measure] = (((value_zh[measure] * gain_multiplier[gain_h] / 1000) * resolution_correction[(resolution_h >> 9) & 0x03]) * 1000) / high_sensor_constant;
 
         sum_value_xh = sum_value_xh + value_xh[measure];
         sum_value_yh = sum_value_yh + value_yh[measure];
