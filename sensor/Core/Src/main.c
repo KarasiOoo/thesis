@@ -351,13 +351,6 @@ void ReadMagneticBurstAveraged(uint8_t samples)
     avg_value_ym = sum_value_ym / samples;
     avg_value_zm = sum_value_zm / samples;
 
-    // avg_value_xm = avg_value_xm - offset_xm;
-    // avg_value_ym = avg_value_ym - offset_ym;
-    // avg_value_zm = avg_value_zm - offset_zm;
-    // avg_value_xh = avg_value_xh - offset_xh;
-    // avg_value_xh = avg_value_xh - offset_xh;
-    // avg_value_xh = avg_value_xh - offset_xh;
-
     i_value_xm = avg_value_xm / 1000;
     f_value_xm = avg_value_xm % 1000;
     i_value_ym = avg_value_ym / 1000;
